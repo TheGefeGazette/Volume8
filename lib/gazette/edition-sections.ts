@@ -25,4 +25,13 @@ export const editionSections = [
             "Announce this week's Bonehead Benching winner and explain the lineup disaster...",
         sortOrder: 2,
     },
+    {
+        title: "Matchups of the Week",
+        heading: "Matchups of the Week",
+        slug: "matchups",
+        fieldName: "matchupsBody",
+        placeholder:
+            "Recap this week's matchups, questionable decisions, and unnecessary drama...",
+        sortOrder: 3,
+    },
 ];

@@ -1,5 +1,6 @@
 "use server";
 
+import { editionSections } from "@/lib/gazette/edition-sections";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -21,6 +22,7 @@ export async function saveDraft(formData: FormData) {
     const welcomeBodyValue = formData.get("welcomeBody");
     const chrisCornerBodyValue = formData.get("chrisCornerBody");
     const boneheadBenchingBodyValue = formData.get("boneheadBenchingBody");
+    const matchupsBodyValue = formData.get("matchupsBody");
 
     const editionId =
         typeof editionIdValue === "string" ? editionIdValue.trim() : "";
@@ -40,32 +42,23 @@ export async function saveDraft(formData: FormData) {
         typeof chrisCornerBodyValue === "string"
             ? chrisCornerBodyValue.trim()
             : "";
-            
+
     const boneheadBenchingBody =
         typeof boneheadBenchingBodyValue === "string"
             ? boneheadBenchingBodyValue.trim()
             : "";
 
-    const sectionDefinitions = [
-        {
-            slug: "welcome",
-            title: "Welcome",
-            body: welcomeBody,
-            sortOrder: 0,
-        },
-        {
-            slug: "chris-corner",
-            title: "Chris' Corner",
-            body: chrisCornerBody,
-            sortOrder: 1,
-        },
-        {
-            slug: "bonehead-benching",
-            title: "Bonehead Benching of the Week",
-            body: boneheadBenchingBody,
-            sortOrder: 2,
-        },
-    ];
+    const matchupsBody =
+        typeof matchupsBodyValue === "string"
+            ? matchupsBodyValue.trim()
+            : "";
+
+    const sectionBodies: Record<string, string> = {
+        welcome: welcomeBody,
+        "chris-corner": chrisCornerBody,
+        "bonehead-benching": boneheadBenchingBody,
+        matchups: matchupsBody,
+    };
 
     async function saveSection(
         targetEditionId: string,
@@ -128,12 +121,12 @@ export async function saveDraft(formData: FormData) {
                 )}`
             );
         }
-        for (const section of sectionDefinitions) {
+        for (const section of editionSections) {
             const sectionSaveError = await saveSection(
                 editionId,
                 section.slug,
                 section.title,
-                section.body,
+                sectionBodies[section.slug],
                 section.sortOrder
             );
 
@@ -177,12 +170,12 @@ export async function saveDraft(formData: FormData) {
         );
     }
 
-    for (const section of sectionDefinitions) {
+    for (const section of editionSections) {
         const sectionSaveError = await saveSection(
             data.id,
             section.slug,
             section.title,
-            section.body,
+            sectionBodies[section.slug],
             section.sortOrder
         );
 

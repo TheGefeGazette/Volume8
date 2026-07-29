@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { editionSections } from "@/lib/gazette/edition-sections";
 import { createClient } from "@/lib/supabase/server";
 import { saveDraft } from "./actions";
@@ -47,7 +48,7 @@ export default async function NewEditionPage({
     );
   }
   return (
-    <form action={saveDraft}>
+    <form key={editionId ?? "new"} action={saveDraft}>
       <input type="hidden" name="editionId" value={editionId ?? ""} />
       <>
         <header className="office-header">
@@ -55,9 +56,17 @@ export default async function NewEditionPage({
             <p>Fresh Ink</p>
             <h1>New Edition</h1>
           </div>
-          <button className="office-primary" type="submit">
-            Save Draft
-          </button>
+          <div className="office-header-actions">
+            {editionId && (
+              <Link className="office-secondary" href="/offices/editions/new">
+                New Draft
+              </Link>
+            )}
+
+            <button className="office-primary" type="submit">
+              Save Draft
+            </button>
+          </div>
         </header>
 
         <div className="editor-shell">
@@ -99,9 +108,7 @@ export default async function NewEditionPage({
 
                 <textarea
                   name={section.fieldName}
-                  defaultValue={
-                    savedSectionBodies[section.slug] || section.placeholder
-                  }
+                  defaultValue={savedSectionBodies[section.slug] ?? ""}
                   rows={10}
                   placeholder={section.placeholder}
                 />
