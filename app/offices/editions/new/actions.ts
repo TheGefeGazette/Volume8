@@ -20,6 +20,7 @@ export async function saveDraft(formData: FormData) {
     const subtitleValue = formData.get("subtitle");
     const welcomeBodyValue = formData.get("welcomeBody");
     const chrisCornerBodyValue = formData.get("chrisCornerBody");
+    const boneheadBenchingBodyValue = formData.get("boneheadBenchingBody");
 
     const editionId =
         typeof editionIdValue === "string" ? editionIdValue.trim() : "";
@@ -39,6 +40,11 @@ export async function saveDraft(formData: FormData) {
         typeof chrisCornerBodyValue === "string"
             ? chrisCornerBodyValue.trim()
             : "";
+            
+    const boneheadBenchingBody =
+        typeof boneheadBenchingBodyValue === "string"
+            ? boneheadBenchingBodyValue.trim()
+            : "";
 
     const sectionDefinitions = [
         {
@@ -52,6 +58,12 @@ export async function saveDraft(formData: FormData) {
             title: "Chris' Corner",
             body: chrisCornerBody,
             sortOrder: 1,
+        },
+        {
+            slug: "bonehead-benching",
+            title: "Bonehead Benching of the Week",
+            body: boneheadBenchingBody,
+            sortOrder: 2,
         },
     ];
 

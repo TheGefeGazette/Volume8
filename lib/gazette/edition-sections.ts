@@ -1,0 +1,28 @@
+export const editionSections = [
+    {
+        title: "Welcome",
+        heading: "Welcome back, Gefes!",
+        slug: "welcome",
+        fieldName: "welcomeBody",
+        placeholder:
+            "Start writing here. The AI Newsroom will suggest, never silently replace.",
+        sortOrder: 0,
+    },
+    {
+        title: "Chris' Corner",
+        heading: "Chris' Corner",
+        slug: "chris-corner",
+        fieldName: "chrisCornerBody",
+        placeholder: "Write Chris' Corner...",
+        sortOrder: 1,
+    },
+    {
+        title: "Bonehead Benching of the Week",
+        heading: "Bonehead Benching of the Week",
+        slug: "bonehead-benching",
+        fieldName: "boneheadBenchingBody",
+        placeholder:
+            "Announce this week's Bonehead Benching winner and explain the lineup disaster...",
+        sortOrder: 2,
+    },
+];

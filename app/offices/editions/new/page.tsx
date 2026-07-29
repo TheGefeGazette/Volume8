@@ -1,22 +1,7 @@
+import { editionSections } from "@/lib/gazette/edition-sections";
 import { createClient } from "@/lib/supabase/server";
 import { saveDraft } from "./actions";
-const sections = [
-  {
-    title: "Welcome",
-    heading: "Welcome back, Gefes!",
-    slug: "welcome",
-    fieldName: "welcomeBody",
-    placeholder:
-      "Start writing here. The AI Newsroom will suggest, never silently replace.",
-  },
-  {
-    title: "Chris' Corner",
-    heading: "Chris' Corner",
-    slug: "chris-corner",
-    fieldName: "chrisCornerBody",
-    placeholder: "Write Chris' Corner...",
-  },
-];
+
 
 type NewEditionPageProps = {
   searchParams: Promise<{
@@ -78,7 +63,7 @@ export default async function NewEditionPage({
         <div className="editor-shell">
           <aside className="section-list">
             <h2>Sections</h2>
-            {sections.map((section, index) => (
+            {editionSections.map((section, index) => (
               <button key={section.slug} type="button">
                 <span>{index + 1}</span>
                 {section.title}
@@ -107,7 +92,7 @@ export default async function NewEditionPage({
               />
             </label>
 
-            {sections.map((section) => (
+            {editionSections.map((section) => (
               <div className="editor-paper" key={section.slug}>
                 <p className="eyebrow">{section.title}</p>
                 <h2>{section.heading}</h2>
