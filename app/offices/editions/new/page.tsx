@@ -1,11 +1,21 @@
 import { createClient } from "@/lib/supabase/server";
 import { saveDraft } from "./actions";
 const sections = [
-  "Welcome",
-  "Chris’ Corner",
-  "Bonehead Benching of the Week",
-  "Matchups",
-  "Closing"
+  {
+    title: "Welcome",
+    heading: "Welcome back, Gefes!",
+    slug: "welcome",
+    fieldName: "welcomeBody",
+    placeholder:
+      "Start writing here. The AI Newsroom will suggest, never silently replace.",
+  },
+  {
+    title: "Chris' Corner",
+    heading: "Chris' Corner",
+    slug: "chris-corner",
+    fieldName: "chrisCornerBody",
+    placeholder: "Write Chris' Corner...",
+  },
 ];
 
 type NewEditionPageProps = {
@@ -26,7 +36,7 @@ export default async function NewEditionPage({
     subtitle: string | null;
   } | null = null;
 
-  let savedWelcomeBody = "";
+  let savedSectionBodies: Record<string, string> = {};
 
   if (editionId) {
     const supabase = await createClient();
@@ -38,14 +48,18 @@ export default async function NewEditionPage({
       .single();
 
     savedEdition = data;
-    const { data: welcomeSection } = await supabase
-      .from("edition_sections")
-      .select("body_html")
-      .eq("edition_id", editionId)
-      .eq("slug", "welcome")
-      .maybeSingle();
 
-    savedWelcomeBody = welcomeSection?.body_html ?? "";
+    const { data: savedSections } = await supabase
+      .from("edition_sections")
+      .select("slug, body_html")
+      .eq("edition_id", editionId);
+
+    savedSectionBodies = Object.fromEntries(
+      (savedSections ?? []).map((section) => [
+        section.slug,
+        section.body_html ?? "",
+      ])
+    );
   }
   return (
     <form action={saveDraft}>
@@ -65,9 +79,9 @@ export default async function NewEditionPage({
           <aside className="section-list">
             <h2>Sections</h2>
             {sections.map((section, index) => (
-              <button key={section} type="button">
+              <button key={section.slug} type="button">
                 <span>{index + 1}</span>
-                {section}
+                {section.title}
               </button>
             ))}
             <button className="add-section" type="button">
@@ -93,20 +107,23 @@ export default async function NewEditionPage({
               />
             </label>
 
+            {sections.map((section) => (
+              <div className="editor-paper" key={section.slug}>
+                <p className="eyebrow">{section.title}</p>
+                <h2>{section.heading}</h2>
 
-            <div className="editor-paper">
-              <p className="eyebrow">Welcome</p>
-              <h2>Welcome back, Gefes!</h2>
-              <textarea
-                name="welcomeBody"
-                defaultValue={
-                  savedWelcomeBody ||
-                  "Start writing here. The AI Newsroom will suggest, never silently replace."
-                }
-                rows={10}
-              />
-              <button type="button">+ Add GIF punchline</button>
-            </div>
+                <textarea
+                  name={section.fieldName}
+                  defaultValue={
+                    savedSectionBodies[section.slug] || section.placeholder
+                  }
+                  rows={10}
+                  placeholder={section.placeholder}
+                />
+
+                <button type="button">+ Add GIF punchline</button>
+              </div>
+            ))}
           </section>
 
           <aside className="tool-drawer">

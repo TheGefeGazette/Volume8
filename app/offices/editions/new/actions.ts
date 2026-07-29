@@ -19,6 +19,7 @@ export async function saveDraft(formData: FormData) {
     const titleValue = formData.get("title");
     const subtitleValue = formData.get("subtitle");
     const welcomeBodyValue = formData.get("welcomeBody");
+    const chrisCornerBodyValue = formData.get("chrisCornerBody");
 
     const editionId =
         typeof editionIdValue === "string" ? editionIdValue.trim() : "";
@@ -33,6 +34,71 @@ export async function saveDraft(formData: FormData) {
 
     const welcomeBody =
         typeof welcomeBodyValue === "string" ? welcomeBodyValue.trim() : "";
+
+    const chrisCornerBody =
+        typeof chrisCornerBodyValue === "string"
+            ? chrisCornerBodyValue.trim()
+            : "";
+
+    const sectionDefinitions = [
+        {
+            slug: "welcome",
+            title: "Welcome",
+            body: welcomeBody,
+            sortOrder: 0,
+        },
+        {
+            slug: "chris-corner",
+            title: "Chris' Corner",
+            body: chrisCornerBody,
+            sortOrder: 1,
+        },
+    ];
+
+    async function saveSection(
+        targetEditionId: string,
+        sectionSlug: string,
+        sectionTitle: string,
+        sectionBody: string,
+        sortOrder: number
+    ) {
+        const { data: existingSection, error: lookupError } = await supabase
+            .from("edition_sections")
+            .select("id")
+            .eq("edition_id", targetEditionId)
+            .eq("slug", sectionSlug)
+            .maybeSingle();
+
+        if (lookupError) {
+            return lookupError;
+        }
+
+        if (existingSection) {
+            const { error: updateError } = await supabase
+                .from("edition_sections")
+                .update({
+                    title: sectionTitle,
+                    body_html: sectionBody,
+                    sort_order: sortOrder,
+                })
+                .eq("id", existingSection.id);
+
+            return updateError;
+        }
+
+        const { error: insertError } = await supabase
+            .from("edition_sections")
+            .insert({
+                edition_id: targetEditionId,
+                title: sectionTitle,
+                slug: sectionSlug,
+                section_type: "article",
+                body_html: sectionBody,
+                sort_order: sortOrder,
+            });
+
+        return insertError;
+    }
 
     if (editionId) {
         const { error } = await supabase
@@ -50,56 +116,22 @@ export async function saveDraft(formData: FormData) {
                 )}`
             );
         }
-        const { data: existingWelcomeSection, error: sectionLookupError } =
-            await supabase
-                .from("edition_sections")
-                .select("id")
-                .eq("edition_id", editionId)
-                .eq("slug", "welcome")
-                .maybeSingle();
-
-        if (sectionLookupError) {
-            redirect(
-                `/offices/editions/new?edition=${editionId}&error=${encodeURIComponent(
-                    sectionLookupError.message
-                )}`
+        for (const section of sectionDefinitions) {
+            const sectionSaveError = await saveSection(
+                editionId,
+                section.slug,
+                section.title,
+                section.body,
+                section.sortOrder
             );
-        }
 
-        let sectionSaveError = null;
-
-        if (existingWelcomeSection) {
-            const { error } = await supabase
-                .from("edition_sections")
-                .update({
-                    title: "Welcome",
-                    body_html: welcomeBody,
-                    sort_order: 0,
-                })
-                .eq("id", existingWelcomeSection.id);
-
-            sectionSaveError = error;
-        } else {
-            const { error } = await supabase
-                .from("edition_sections")
-                .insert({
-                    edition_id: editionId,
-                    title: "Welcome",
-                    slug: "welcome",
-                    section_type: "article",
-                    body_html: welcomeBody,
-                    sort_order: 0,
-                });
-
-            sectionSaveError = error;
-        }
-
-        if (sectionSaveError) {
-            redirect(
-                `/offices/editions/new?edition=${editionId}&error=${encodeURIComponent(
-                    sectionSaveError.message
-                )}`
-            );
+            if (sectionSaveError) {
+                redirect(
+                    `/offices/editions/new?edition=${editionId}&error=${encodeURIComponent(
+                        sectionSaveError.message
+                    )}`
+                );
+            }
         }
 
         redirect(
@@ -133,23 +165,22 @@ export async function saveDraft(formData: FormData) {
         );
     }
 
-    const { error: welcomeSectionError } = await supabase
-        .from("edition_sections")
-        .insert({
-            edition_id: data.id,
-            title: "Welcome",
-            slug: "welcome",
-            section_type: "article",
-            body_html: welcomeBody,
-            sort_order: 0,
-        });
-
-    if (welcomeSectionError) {
-        redirect(
-            `/offices/editions/new?edition=${data.id}&error=${encodeURIComponent(
-                welcomeSectionError.message
-            )}`
+    for (const section of sectionDefinitions) {
+        const sectionSaveError = await saveSection(
+            data.id,
+            section.slug,
+            section.title,
+            section.body,
+            section.sortOrder
         );
+
+        if (sectionSaveError) {
+            redirect(
+                `/offices/editions/new?edition=${data.id}&error=${encodeURIComponent(
+                    sectionSaveError.message
+                )}`
+            );
+        }
     }
 
     redirect(
