@@ -1,6 +1,14 @@
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
-export default function OfficesPage() {
+export default async function OfficesPage() {
+  const supabase = await createClient();
+
+  const { data: editions, error } = await supabase
+    .from("editions")
+    .select("id, title, status, slug, updated_at")
+    .order("updated_at", { ascending: false });
+
   return (
     <>
       <header className="office-header">
@@ -27,7 +35,7 @@ export default function OfficesPage() {
         <article>
           <span>Newsroom Status</span>
           <strong>Questionable</strong>
-          <p>Three C.H.U.D.s remain unaccounted for</p>
+          <p>Morale remains at an all-time low</p>
         </article>
       </section>
 
@@ -35,23 +43,36 @@ export default function OfficesPage() {
         <p className="eyebrow">Recent Work</p>
         <h2>Open Editions</h2>
 
-        <div className="edition-row">
-          <div>
-            <strong>Edition 10 — Untitled Draft</strong>
-            <span>
-              Welcome · Chris&apos; Corner · BBW · Matchups · Closing
-            </span>
-          </div>
-          <Link href="/offices/editions/new">Edit</Link>
-        </div>
+        {error && (
+          <p>Unable to load editions: {error.message}</p>
+        )}
 
-        <div className="edition-row">
-          <div>
-            <strong>Edition 9 — Bad Decisions, Worse Excuses</strong>
-            <span>Published October 13, 2026</span>
+        {!error && editions?.length === 0 && (
+          <p>No editions have been created yet.</p>
+        )}
+
+        {editions?.map((edition) => (
+          <div className="edition-row" key={edition.id}>
+            <div>
+              <strong>{edition.title}</strong>
+              <span>
+                Status: {edition.status}
+                {edition.updated_at &&
+                  ` · Updated ${new Date(edition.updated_at).toLocaleDateString()}`}
+              </span>
+            </div>
+
+            {edition.status === "draft" ? (
+              <Link href={`/offices/editions/new?edition=${edition.id}`}>
+                Edit
+              </Link>
+            ) : (
+              <Link href={`/editions/${edition.slug}`}>
+                View
+              </Link>
+            )}
           </div>
-          <Link href="/editions/bad-decisions-worse-excuses">View</Link>
-        </div>
+        ))}
       </section>
     </>
   );
