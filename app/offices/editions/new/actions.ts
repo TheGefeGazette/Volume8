@@ -19,10 +19,10 @@ export async function saveDraft(formData: FormData) {
     const editionIdValue = formData.get("editionId");
     const titleValue = formData.get("title");
     const subtitleValue = formData.get("subtitle");
-    const welcomeBodyValue = formData.get("welcomeBody");
-    const chrisCornerBodyValue = formData.get("chrisCornerBody");
-    const boneheadBenchingBodyValue = formData.get("boneheadBenchingBody");
-    const matchupsBodyValue = formData.get("matchupsBody");
+
+    const actionValue = formData.get("action");
+    const isPublishing = actionValue === "publish";
+
 
     const editionId =
         typeof editionIdValue === "string" ? editionIdValue.trim() : "";
@@ -35,30 +35,15 @@ export async function saveDraft(formData: FormData) {
     const subtitle =
         typeof subtitleValue === "string" ? subtitleValue.trim() : "";
 
-    const welcomeBody =
-        typeof welcomeBodyValue === "string" ? welcomeBodyValue.trim() : "";
 
-    const chrisCornerBody =
-        typeof chrisCornerBodyValue === "string"
-            ? chrisCornerBodyValue.trim()
-            : "";
+    const sectionBodies: Record<string, string> = {};
 
-    const boneheadBenchingBody =
-        typeof boneheadBenchingBodyValue === "string"
-            ? boneheadBenchingBodyValue.trim()
-            : "";
+    for (const section of editionSections) {
+        const value = formData.get(section.fieldName);
 
-    const matchupsBody =
-        typeof matchupsBodyValue === "string"
-            ? matchupsBodyValue.trim()
-            : "";
-
-    const sectionBodies: Record<string, string> = {
-        welcome: welcomeBody,
-        "chris-corner": chrisCornerBody,
-        "bonehead-benching": boneheadBenchingBody,
-        matchups: matchupsBody,
-    };
+        sectionBodies[section.slug] =
+            typeof value === "string" ? value.trim() : "";
+    }
 
     async function saveSection(
         targetEditionId: string,
@@ -111,6 +96,7 @@ export async function saveDraft(formData: FormData) {
             .update({
                 title,
                 subtitle,
+                status: isPublishing ? "published" : "draft",
             })
             .eq("id", editionId);
 
@@ -159,7 +145,7 @@ export async function saveDraft(formData: FormData) {
             title,
             subtitle,
             slug,
-            status: "draft",
+            status: isPublishing ? "published" : "draft",
         })
         .select("id")
         .single();

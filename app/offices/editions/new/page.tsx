@@ -63,9 +63,20 @@ export default async function NewEditionPage({
               </Link>
             )}
 
-            <button className="office-primary" type="submit">
-              Save Draft
-            </button>
+            <div style={{ display: "flex", gap: "0.75rem" }}>
+              <button className="office-primary" type="submit">
+                Save Draft
+              </button>
+
+              <button
+                className="office-primary"
+                type="submit"
+                name="action"
+                value="publish"
+              >
+                Publish
+              </button>
+            </div>
           </div>
         </header>
 

@@ -9,6 +9,12 @@ export default async function OfficesPage() {
     .select("id, title, status, slug, updated_at")
     .order("updated_at", { ascending: false });
 
+  const draftEditions =
+    editions?.filter((edition) => edition.status === "draft") ?? [];
+
+  const publishedEditions =
+    editions?.filter((edition) => edition.status !== "draft") ?? [];
+
   return (
     <>
       <header className="office-header">
@@ -51,28 +57,52 @@ export default async function OfficesPage() {
           <p>No editions have been created yet.</p>
         )}
 
-        {editions?.map((edition) => (
-          <div className="edition-row" key={edition.id}>
-            <div>
-              <strong>{edition.title}</strong>
-              <span>
-                Status: {edition.status}
-                {edition.updated_at &&
-                  ` · Updated ${new Date(edition.updated_at).toLocaleDateString()}`}
-              </span>
-            </div>
+        <h3 className="edition-group-heading">Drafts</h3>
 
-            {edition.status === "draft" ? (
+        {draftEditions.length === 0 ? (
+          <p>No draft editions.</p>
+        ) : (
+          draftEditions.map((edition) => (
+            <div className="edition-row" key={edition.id}>
+              <div>
+                <strong>{edition.title}</strong>
+                <span>
+                  Updated{" "}
+                  {edition.updated_at
+                    ? new Date(edition.updated_at).toLocaleDateString()
+                    : "Unknown"}
+                </span>
+              </div>
+
               <Link href={`/offices/editions/new?edition=${edition.id}`}>
                 Edit
               </Link>
-            ) : (
+            </div>
+          ))
+        )}
+
+        <h3 className="edition-group-heading">Published</h3>
+        {publishedEditions.length === 0 ? (
+          <p>No published editions yet.</p>
+        ) : (
+          publishedEditions.map((edition) => (
+            <div className="edition-row" key={edition.id}>
+              <div>
+                <strong>{edition.title}</strong>
+                <span>
+                  Updated{" "}
+                  {edition.updated_at
+                    ? new Date(edition.updated_at).toLocaleDateString()
+                    : "Unknown"}
+                </span>
+              </div>
+
               <Link href={`/editions/${edition.slug}`}>
                 View
               </Link>
-            )}
-          </div>
-        ))}
+            </div>
+          ))
+        )}
       </section>
     </>
   );
