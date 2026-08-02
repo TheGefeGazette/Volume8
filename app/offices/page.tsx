@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { deleteDraft } from "./actions";
 
 export default async function OfficesPage() {
   const supabase = await createClient();
@@ -74,9 +75,16 @@ export default async function OfficesPage() {
                 </span>
               </div>
 
-              <Link href={`/offices/editions/new?edition=${edition.id}`}>
-                Edit
-              </Link>
+              <div className="edition-row-actions">
+                <Link href={`/offices/editions/new?edition=${edition.id}`}>
+                  Edit
+                </Link>
+
+                <form action={deleteDraft}>
+                  <input type="hidden" name="editionId" value={edition.id} />
+                  <button type="submit">Delete</button>
+                </form>
+              </div>
             </div>
           ))
         )}

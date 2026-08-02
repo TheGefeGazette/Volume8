@@ -551,6 +551,26 @@ a {
   text-transform: uppercase;
 }
 
+.edition-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.edition-row-actions form {
+  margin: 0;
+}
+
+.edition-row-actions button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #a32020;
+  font: inherit;
+  text-decoration: underline;
+}
+
 .edition-row {
   display: flex;
   justify-content: space-between;
