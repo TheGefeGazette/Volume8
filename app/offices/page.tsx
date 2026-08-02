@@ -16,6 +16,9 @@ export default async function OfficesPage() {
   const publishedEditions =
     editions?.filter((edition) => edition.status !== "draft") ?? [];
 
+  const currentDraft = draftEditions[0];
+  const latestPublished = publishedEditions[0];
+
   return (
     <>
       <header className="office-header">
@@ -31,18 +34,39 @@ export default async function OfficesPage() {
       <section className="status-grid">
         <article>
           <span>Current Draft</span>
-          <strong>Edition 10</strong>
-          <p>Last saved 12 minutes ago</p>
+          <strong>{currentDraft?.title ?? "No Active Draft"}</strong>
+          <p>
+            {currentDraft?.updated_at
+              ? `Last updated ${new Date(
+                currentDraft.updated_at
+              ).toLocaleDateString()}`
+              : "The newsroom is waiting for fresh copy"}
+          </p>
         </article>
+
         <article>
           <span>Latest Edition</span>
-          <strong>Issue 9</strong>
-          <p>Presses ran successfully</p>
+          <strong>{latestPublished?.title ?? "Nothing Published Yet"}</strong>
+          <p>
+            {latestPublished?.updated_at
+              ? `Published edition updated ${new Date(
+                latestPublished.updated_at
+              ).toLocaleDateString()}`
+              : "The presses remain suspiciously quiet"}
+          </p>
         </article>
+
         <article>
           <span>Newsroom Status</span>
-          <strong>Questionable</strong>
-          <p>Morale remains at an all-time low</p>
+          <strong>
+            {draftEditions.length}{" "}
+            {draftEditions.length === 1 ? "Draft" : "Drafts"} Waiting
+          </strong>
+          <p>
+            {draftEditions.length === 0
+              ? "Morale has improved to merely questionable"
+              : "Morale remains at an all-time low"}
+          </p>
         </article>
       </section>
 

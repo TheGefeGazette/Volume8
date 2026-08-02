@@ -551,6 +551,31 @@ a {
   text-transform: uppercase;
 }
 
+.editor-message {
+  margin: 1rem 0 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 2px solid currentColor;
+}
+
+.editor-message strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.editor-message p {
+  margin: 0.35rem 0 0;
+}
+
+.editor-message-success {
+  background: #edf4e7;
+  color: #1f2a1f;
+}
+
+.editor-message-error {
+  background: #f8e4e1;
+  color: #4a1717;
+}
+
 .edition-row-actions {
   display: flex;
   align-items: center;

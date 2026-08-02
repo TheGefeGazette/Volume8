@@ -126,7 +126,9 @@ export async function saveDraft(formData: FormData) {
         }
 
         redirect(
-            `/offices/editions/new?edition=${editionId}&success=Draft updated`
+            `/offices/editions/new?edition=${editionId}&success=${encodeURIComponent(
+                isPublishing ? "Edition published" : "Draft updated"
+            )}`
         );
     }
 
@@ -175,6 +177,8 @@ export async function saveDraft(formData: FormData) {
     }
 
     redirect(
-        `/offices/editions/new?edition=${data.id}&success=Draft saved`
+        `/offices/editions/new?edition=${data.id}&success=${encodeURIComponent(
+            isPublishing ? "Edition published" : "Draft saved"
+        )}`
     );
 }

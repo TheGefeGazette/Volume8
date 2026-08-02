@@ -15,7 +15,11 @@ type NewEditionPageProps = {
 export default async function NewEditionPage({
   searchParams,
 }: NewEditionPageProps) {
-  const { edition: editionId } = await searchParams;
+  const {
+    edition: editionId,
+    success,
+    error,
+  } = await searchParams;
 
   let savedEdition: {
     title: string;
@@ -79,6 +83,27 @@ export default async function NewEditionPage({
             </div>
           </div>
         </header>
+
+        {success && (
+          <div className="editor-message editor-message-success" role="status">
+            <strong>
+              {success === "Edition published"
+                ? "Extra! Extra! The presses are rolling."
+                : success}
+            </strong>
+
+            {success === "Edition published" && (
+              <p>The edition was successfully published.</p>
+            )}
+          </div>
+        )}
+
+        {error && (
+          <div className="editor-message editor-message-error" role="alert">
+            <strong>Newsroom problem</strong>
+            <p>{error}</p>
+          </div>
+        )}
 
         <div className="editor-shell">
           <aside className="section-list">
