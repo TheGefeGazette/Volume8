@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { deleteDraft } from "./actions";
+import { deleteDraft, copyEdition } from "./actions";
 
 export default async function OfficesPage() {
   const supabase = await createClient();
@@ -80,9 +80,24 @@ export default async function OfficesPage() {
                   Edit
                 </Link>
 
+                <form action={copyEdition}>
+                  <input
+                    type="hidden"
+                    name="editionId"
+                    value={edition.id}
+                  />
+
+                  <button type="submit">
+                    Copy
+                  </button>
+                </form>
+
                 <form action={deleteDraft}>
                   <input type="hidden" name="editionId" value={edition.id} />
-                  <button type="submit">Delete</button>
+
+                  <button type="submit">
+                    Delete
+                  </button>
                 </form>
               </div>
             </div>
