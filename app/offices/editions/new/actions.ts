@@ -23,7 +23,6 @@ export async function saveDraft(formData: FormData) {
     const actionValue = formData.get("action");
     const isPublishing = actionValue === "publish";
 
-
     const editionId =
         typeof editionIdValue === "string" ? editionIdValue.trim() : "";
 
@@ -35,14 +34,18 @@ export async function saveDraft(formData: FormData) {
     const subtitle =
         typeof subtitleValue === "string" ? subtitleValue.trim() : "";
 
-
     const sectionBodies: Record<string, string> = {};
+    const sectionGifUrls: Record<string, string> = {};
 
     for (const section of editionSections) {
-        const value = formData.get(section.fieldName);
+        const bodyValue = formData.get(section.fieldName);
+        const gifValue = formData.get(`gifUrl:${section.slug}`);
 
         sectionBodies[section.slug] =
-            typeof value === "string" ? value.trim() : "";
+            typeof bodyValue === "string" ? bodyValue.trim() : "";
+
+        sectionGifUrls[section.slug] =
+            typeof gifValue === "string" ? gifValue.trim() : "";
     }
 
     async function saveSection(
@@ -50,6 +53,7 @@ export async function saveDraft(formData: FormData) {
         sectionSlug: string,
         sectionTitle: string,
         sectionBody: string,
+        gifUrl: string,
         sortOrder: number
     ) {
         const { data: existingSection, error: lookupError } = await supabase
@@ -69,6 +73,7 @@ export async function saveDraft(formData: FormData) {
                 .update({
                     title: sectionTitle,
                     body_html: sectionBody,
+                    gif_url: gifUrl,
                     sort_order: sortOrder,
                 })
                 .eq("id", existingSection.id);
@@ -84,6 +89,7 @@ export async function saveDraft(formData: FormData) {
                 slug: sectionSlug,
                 section_type: "article",
                 body_html: sectionBody,
+                gif_url: gifUrl,
                 sort_order: sortOrder,
             });
 
@@ -107,12 +113,14 @@ export async function saveDraft(formData: FormData) {
                 )}`
             );
         }
+
         for (const section of editionSections) {
             const sectionSaveError = await saveSection(
                 editionId,
                 section.slug,
                 section.title,
                 sectionBodies[section.slug],
+                sectionGifUrls[section.slug],
                 section.sortOrder
             );
 
@@ -164,6 +172,7 @@ export async function saveDraft(formData: FormData) {
             section.slug,
             section.title,
             sectionBodies[section.slug],
+            sectionGifUrls[section.slug],
             section.sortOrder
         );
 

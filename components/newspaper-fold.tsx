@@ -3,9 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Masthead } from "@/components/masthead";
-import { latestEdition } from "@/lib/demo-data";
+type NewspaperFoldProps = {
+  latestEdition: {
+    title: string;
+    subtitle: string;
+    slug: string;
+  };
+};
 
-export function NewspaperFold() {
+export function NewspaperFold({
+  latestEdition,
+}: NewspaperFoldProps) {
   const [opened, setOpened] = useState(false);
 
   return (

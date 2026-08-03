@@ -28,6 +28,8 @@ export default async function NewEditionPage({
 
   let savedSectionBodies: Record<string, string> = {};
 
+  let savedSectionGifUrls: Record<string, string> = {};
+
   if (editionId) {
     const supabase = await createClient();
 
@@ -41,13 +43,20 @@ export default async function NewEditionPage({
 
     const { data: savedSections } = await supabase
       .from("edition_sections")
-      .select("slug, body_html")
+      .select("slug, body_html, gif_url")
       .eq("edition_id", editionId);
 
     savedSectionBodies = Object.fromEntries(
       (savedSections ?? []).map((section) => [
         section.slug,
         section.body_html ?? "",
+      ])
+    );
+
+    savedSectionGifUrls = Object.fromEntries(
+      (savedSections ?? []).map((section) => [
+        section.slug,
+        section.gif_url ?? "",
       ])
     );
   }
@@ -149,7 +158,15 @@ export default async function NewEditionPage({
                   placeholder={section.placeholder}
                 />
 
-                <button type="button">+ Add GIF punchline</button>
+                <label className="section-gif-field">
+                  GIF URL
+                  <input
+                    type="url"
+                    name={`gifUrl:${section.slug}`}
+                    defaultValue={savedSectionGifUrls[section.slug] ?? ""}
+                    placeholder="Paste a direct GIF URL here"
+                  />
+                </label>
               </div>
             ))}
           </section>
