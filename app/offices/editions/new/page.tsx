@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { GazetteRichTextEditor } from "@/components/gazette-rich-text-editor";
+import { GifPicker } from "@/components/gif-picker";
 import { editionSections } from "@/lib/gazette/edition-sections";
 import { createClient } from "@/lib/supabase/server";
 import { saveDraft } from "./actions";
@@ -151,22 +153,24 @@ export default async function NewEditionPage({
                 <p className="eyebrow">{section.title}</p>
                 <h2>{section.heading}</h2>
 
-                <textarea
-                  name={section.fieldName}
-                  defaultValue={savedSectionBodies[section.slug] ?? ""}
-                  rows={10}
-                  placeholder={section.placeholder}
-                />
-
-                <label className="section-gif-field">
-                  GIF URL
-                  <input
-                    type="url"
-                    name={`gifUrl:${section.slug}`}
-                    defaultValue={savedSectionGifUrls[section.slug] ?? ""}
-                    placeholder="Paste a direct GIF URL here"
+                {section.slug === "welcome" ? (
+                  <GazetteRichTextEditor
+                    fieldName={section.fieldName}
+                    initialContent={savedSectionBodies[section.slug] ?? ""}
                   />
-                </label>
+                ) : (
+                  <textarea
+                    name={section.fieldName}
+                    defaultValue={savedSectionBodies[section.slug] ?? ""}
+                    rows={10}
+                    placeholder={section.placeholder}
+                  />
+                )}
+
+                <GifPicker
+                  fieldName={`gifUrl:${section.slug}`}
+                  initialUrl={savedSectionGifUrls[section.slug] ?? ""}
+                />
               </div>
             ))}
           </section>
