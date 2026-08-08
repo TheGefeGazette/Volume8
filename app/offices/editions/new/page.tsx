@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { SectionEditorTabs } from "@/components/section-editor-tabs";
-import { editionSections } from "@/lib/gazette/edition-sections";
 import { createClient } from "@/lib/supabase/server";
 import { saveDraft } from "./actions";
 
@@ -33,6 +32,12 @@ export default async function NewEditionPage({
 
   let savedSectionGifUrls: Record<string, string> = {};
 
+  let customSections: {
+    title: string;
+    slug: string;
+    sortOrder: number;
+  }[] = [];
+
   if (editionId) {
     const supabase = await createClient();
 
@@ -46,7 +51,7 @@ export default async function NewEditionPage({
 
     const { data: savedSections } = await supabase
       .from("edition_sections")
-      .select("slug, body_html, gif_url")
+      .select("slug, title, body_html, gif_url, section_type, sort_order")
       .eq("edition_id", editionId);
 
     savedSectionBodies = Object.fromEntries(
@@ -62,6 +67,15 @@ export default async function NewEditionPage({
         section.gif_url ?? "",
       ])
     );
+
+    customSections = (savedSections ?? [])
+      .filter((section) => section.section_type === "custom")
+      .map((section) => ({
+        title: section.title,
+        slug: section.slug,
+        sortOrder: section.sort_order ?? 100,
+      }))
+      .sort((a, b) => a.sortOrder - b.sortOrder);
   }
   return (
     <form key={editionId ?? "new"} action={saveDraft}>
@@ -150,6 +164,8 @@ export default async function NewEditionPage({
             savedSectionBodies={savedSectionBodies}
             savedSectionGifUrls={savedSectionGifUrls}
             initialActiveSlug={activeSection}
+            editionId={editionId}
+            customSections={customSections}
           />
 
           <aside className="tool-drawer">

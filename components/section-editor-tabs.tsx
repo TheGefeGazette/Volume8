@@ -1,5 +1,6 @@
 "use client";
 
+import { addStory } from "@/app/offices/editions/new/actions";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { GazetteRichTextEditor } from "@/components/gazette-rich-text-editor";
 import { GifPicker } from "@/components/gif-picker";
@@ -9,28 +10,48 @@ type SectionEditorTabsProps = {
     savedSectionBodies: Record<string, string>;
     savedSectionGifUrls: Record<string, string>;
     initialActiveSlug?: string;
+    editionId?: string;
+    customSections: {
+        title: string;
+        slug: string;
+        sortOrder: number;
+    }[];
 };
 
 export function SectionEditorTabs({
     savedSectionBodies,
     savedSectionGifUrls,
     initialActiveSlug,
+    editionId,
+    customSections = [],
 }: SectionEditorTabsProps) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
+    const allSections = [
+        ...editionSections,
+        ...customSections.map((section) => ({
+            title: section.title,
+            heading: section.title,
+            slug: section.slug,
+            fieldName: `customBody:${section.slug}`,
+            placeholder: `Write ${section.title}...`,
+            sortOrder: section.sortOrder,
+        })),
+    ];
+
     const sectionFromUrl = searchParams.get("section");
 
-    const activeSlug = editionSections.some(
+    const activeSlug = allSections.some(
         (section) => section.slug === sectionFromUrl
     )
         ? sectionFromUrl!
-        : editionSections.some(
+        : allSections.some(
             (section) => section.slug === initialActiveSlug
         )
             ? initialActiveSlug!
-            : editionSections[0]?.slug ?? "welcome";
+            : allSections[0]?.slug ?? "welcome";
 
     function chooseSection(sectionSlug: string) {
         const params = new URLSearchParams(searchParams.toString());
@@ -51,7 +72,7 @@ export function SectionEditorTabs({
             <aside className="section-list">
                 <h2>Sections</h2>
 
-                {editionSections.map((section, index) => (
+                {allSections.map((section, index) => (
                     <button
                         key={section.slug}
                         type="button"
@@ -63,13 +84,31 @@ export function SectionEditorTabs({
                     </button>
                 ))}
 
-                <button className="add-section" type="button">
-                    + Optional Detail
-                </button>
+                {editionId ? (
+                    <div className="add-story-form">
+                        <input
+                            type="text"
+                            name="storyTitle"
+                            placeholder="Story title"
+                        />
+
+                        <button
+                            className="add-section"
+                            type="submit"
+                            formAction={addStory}
+                        >
+                            + Add Story
+                        </button>
+                    </div>
+                ) : (
+                    <p className="add-story-note">
+                        Save this edition before adding a custom story.
+                    </p>
+                )}
             </aside>
 
             <div className="section-editor-pages">
-                {editionSections.map((section) => (
+                {allSections.map((section) => (
                     <div
                         key={section.slug}
                         className={`section-editor-page ${activeSlug === section.slug ? "is-active" : ""

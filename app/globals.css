@@ -1482,3 +1482,25 @@ a {
   border-color: #eee2d3;
   color: #fff;
 }
+
+/* ---------- Add Story ---------- */
+
+.add-story-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.add-story-form input {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #8a8178;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.add-story-note {
+  margin-top: 14px;
+  font-size: 0.78rem;
+  color: #8f8175;
+}
