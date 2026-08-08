@@ -1174,11 +1174,36 @@ a {
 
 .gazette-rich-toolbar button {
   width: auto;
-  padding: 8px 12px;
+  min-height: 34px;
+
+  padding: 7px 11px;
+
   border: 1px solid #776b5e;
+  border-radius: 3px;
+
   background: var(--paper);
   color: var(--ink);
+
+  font: 700 0.78rem Arial, sans-serif;
+  letter-spacing: 0.02em;
+
   cursor: pointer;
+
+  transition:
+    background 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+.gazette-rich-toolbar button:hover {
+  background: #e1d5c3;
+  border-color: var(--ink);
+}
+
+.gazette-rich-toolbar button.is-active {
+  background: var(--burgundy);
+  color: white;
+  border-color: var(--burgundy);
 }
 
 .gazette-rich-toolbar button.is-active {
@@ -1275,4 +1300,102 @@ a {
   height: auto;
   margin: 1.5rem auto;
   object-fit: contain;
+}
+
+/* ---------- Edition Preview ---------- */
+
+.preview-banner {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 12px 20px;
+
+  background: #6f1824;
+  color: #fff;
+
+  font: 700 0.78rem Arial, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.preview-banner a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.story-body {
+  font-size: 1.1rem;
+  line-height: 1.68;
+}
+
+.story-body p {
+  margin: 0 0 1.2em;
+}
+
+.story-body img {
+  display: block;
+  max-width: min(100%, 620px);
+  height: auto;
+  margin: 1.5rem auto;
+}
+
+.story-body hr {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid var(--ink);
+}
+
+/* ---------- Preview readability fix ---------- */
+
+.edition-sheet,
+.edition-sheet p,
+.edition-sheet h1,
+.edition-sheet h2,
+.edition-sheet h3,
+.edition-sheet h4,
+.edition-sheet h5,
+.edition-sheet h6,
+.edition-sheet strong,
+.edition-sheet span,
+.story-body,
+.story-body p,
+.story-body h1,
+.story-body h2,
+.story-body h3,
+.story-body h4,
+.edition-sidebar,
+.edition-sidebar p,
+.edition-sidebar h4,
+.staff-note,
+.staff-note p,
+.optional-module,
+.optional-module p {
+  color: var(--ink);
+}
+
+.lead-header h2,
+.story-section>h3 {
+  color: var(--ink);
+}
+
+.section-kicker,
+.staff-note>span,
+.optional-module>span {
+  color: var(--burgundy);
+}
+
+.edition-sheet {
+  opacity: 1;
+}
+
+.edition-sheet * {
+  text-shadow: none;
 }

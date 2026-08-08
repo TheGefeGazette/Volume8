@@ -83,6 +83,15 @@ export default async function NewEditionPage({
                 Save Draft
               </button>
 
+              {editionId && (
+                <Link
+                  className="office-secondary"
+                  href={`/offices/editions/preview/${editionId}`}
+                >
+                  Preview Edition
+                </Link>
+              )}
+
               <button
                 className="office-primary"
                 type="submit"
@@ -153,17 +162,17 @@ export default async function NewEditionPage({
                 <p className="eyebrow">{section.title}</p>
                 <h2>{section.heading}</h2>
 
-                {section.slug === "welcome" ? (
-                  <GazetteRichTextEditor
-                    fieldName={section.fieldName}
-                    initialContent={savedSectionBodies[section.slug] ?? ""}
-                  />
-                ) : (
+                {section.slug === "matchups" ? (
                   <textarea
                     name={section.fieldName}
                     defaultValue={savedSectionBodies[section.slug] ?? ""}
                     rows={10}
                     placeholder={section.placeholder}
+                  />
+                ) : (
+                  <GazetteRichTextEditor
+                    fieldName={section.fieldName}
+                    initialContent={savedSectionBodies[section.slug] ?? ""}
                   />
                 )}
 
