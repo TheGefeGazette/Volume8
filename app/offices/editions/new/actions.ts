@@ -16,9 +16,14 @@ export async function saveDraft(formData: FormData) {
         redirect("/offices/login");
     }
 
+    const activeSectionValue = formData.get("activeSection");
     const editionIdValue = formData.get("editionId");
     const titleValue = formData.get("title");
     const subtitleValue = formData.get("subtitle");
+    const activeSection =
+        typeof activeSectionValue === "string" && activeSectionValue.trim()
+            ? activeSectionValue.trim()
+            : "welcome";
 
     const actionValue = formData.get("action");
     const isPublishing = actionValue === "publish";
@@ -108,9 +113,9 @@ export async function saveDraft(formData: FormData) {
 
         if (error) {
             redirect(
-                `/offices/editions/new?edition=${editionId}&error=${encodeURIComponent(
-                    error.message
-                )}`
+                `/offices/editions/new?edition=${editionId}&section=${encodeURIComponent(
+                    activeSection
+                )}&error=${encodeURIComponent(error.message)}`
             );
         }
 
@@ -134,7 +139,9 @@ export async function saveDraft(formData: FormData) {
         }
 
         redirect(
-            `/offices/editions/new?edition=${editionId}&success=${encodeURIComponent(
+            `/offices/editions/new?edition=${editionId}&section=${encodeURIComponent(
+                activeSection
+            )}&success=${encodeURIComponent(
                 isPublishing ? "Edition published" : "Draft updated"
             )}`
         );
@@ -186,8 +193,10 @@ export async function saveDraft(formData: FormData) {
     }
 
     redirect(
-        `/offices/editions/new?edition=${data.id}&success=${encodeURIComponent(
+        `/offices/editions/new?edition=${data.id}&section=${encodeURIComponent(
+            activeSection
+        )}&success=${encodeURIComponent(
             isPublishing ? "Edition published" : "Draft saved"
         )}`
     );
-}
+}   

@@ -1399,3 +1399,86 @@ a {
 .edition-sheet * {
   text-shadow: none;
 }
+
+/* ---------- One Story At A Time ---------- */
+
+.section-editor-pages {
+  min-width: 0;
+}
+
+.section-editor-page {
+  display: none;
+}
+
+.section-editor-page.is-active {
+  display: block;
+}
+
+.section-list button.is-active {
+  background: var(--burgundy);
+  color: #fff;
+  border-color: var(--burgundy);
+}
+
+.section-list button.is-active span {
+  color: #fff;
+}
+
+/* ---------- Editor Action Button Polish ---------- */
+
+.office-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.office-header-actions>div {
+  display: flex !important;
+  align-items: center;
+  gap: 0.75rem !important;
+}
+
+.office-header-actions .office-primary,
+.office-header-actions .office-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 42px;
+  min-width: 112px;
+  padding: 0.7rem 1rem;
+
+  border-radius: 3px;
+
+  font: 700 0.82rem Arial, sans-serif;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  cursor: pointer;
+}
+
+/* Main actions: Save + Publish */
+.office-header-actions .office-primary {
+  background: var(--burgundy);
+  color: #fff;
+  border: 1px solid var(--burgundy);
+}
+
+/* Secondary actions: New Draft + Preview */
+.office-header-actions .office-secondary {
+  background: transparent;
+  color: #eee2d3;
+  border: 1px solid #9a8b7c;
+}
+
+.office-header-actions .office-primary:hover {
+  filter: brightness(1.1);
+}
+
+.office-header-actions .office-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #eee2d3;
+  color: #fff;
+}

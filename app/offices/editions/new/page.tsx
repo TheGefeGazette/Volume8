@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { GazetteRichTextEditor } from "@/components/gazette-rich-text-editor";
-import { GifPicker } from "@/components/gif-picker";
+import { SectionEditorTabs } from "@/components/section-editor-tabs";
 import { editionSections } from "@/lib/gazette/edition-sections";
 import { createClient } from "@/lib/supabase/server";
 import { saveDraft } from "./actions";
@@ -11,6 +10,7 @@ type NewEditionPageProps = {
     edition?: string;
     success?: string;
     error?: string;
+    section?: string;
   }>;
 };
 
@@ -21,6 +21,7 @@ export default async function NewEditionPage({
     edition: editionId,
     success,
     error,
+    section: activeSection,
   } = await searchParams;
 
   let savedEdition: {
@@ -125,64 +126,31 @@ export default async function NewEditionPage({
           </div>
         )}
 
+        <section className="editor-canvas editor-edition-details">
+          <label>
+            Edition title
+            <input
+              name="title"
+              defaultValue={savedEdition?.title ?? "Untitled Edition"}
+            />
+          </label>
+
+          <label>
+            Subtitle
+            <input
+              name="subtitle"
+              defaultValue={savedEdition?.subtitle ?? ""}
+              placeholder="A dignified summary of this week’s indignities"
+            />
+          </label>
+        </section>
+
         <div className="editor-shell">
-          <aside className="section-list">
-            <h2>Sections</h2>
-            {editionSections.map((section, index) => (
-              <button key={section.slug} type="button">
-                <span>{index + 1}</span>
-                {section.title}
-              </button>
-            ))}
-            <button className="add-section" type="button">
-              + Optional Detail
-            </button>
-          </aside>
-
-          <section className="editor-canvas">
-            <label>
-              Edition title
-              <input
-                name="title"
-                defaultValue={savedEdition?.title ?? "Untitled Edition"}
-              />
-            </label>
-
-            <label>
-              Subtitle
-              <input
-                name="subtitle"
-                defaultValue={savedEdition?.subtitle ?? ""}
-                placeholder="A dignified summary of this week’s indignities"
-              />
-            </label>
-
-            {editionSections.map((section) => (
-              <div className="editor-paper" key={section.slug}>
-                <p className="eyebrow">{section.title}</p>
-                <h2>{section.heading}</h2>
-
-                {section.slug === "matchups" ? (
-                  <textarea
-                    name={section.fieldName}
-                    defaultValue={savedSectionBodies[section.slug] ?? ""}
-                    rows={10}
-                    placeholder={section.placeholder}
-                  />
-                ) : (
-                  <GazetteRichTextEditor
-                    fieldName={section.fieldName}
-                    initialContent={savedSectionBodies[section.slug] ?? ""}
-                  />
-                )}
-
-                <GifPicker
-                  fieldName={`gifUrl:${section.slug}`}
-                  initialUrl={savedSectionGifUrls[section.slug] ?? ""}
-                />
-              </div>
-            ))}
-          </section>
+          <SectionEditorTabs
+            savedSectionBodies={savedSectionBodies}
+            savedSectionGifUrls={savedSectionGifUrls}
+            initialActiveSlug={activeSection}
+          />
 
           <aside className="tool-drawer">
             <h2>Newsroom Tools</h2>
