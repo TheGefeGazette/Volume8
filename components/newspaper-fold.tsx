@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Masthead } from "@/components/masthead";
+
 type NewspaperFoldProps = {
   latestEdition: {
     title: string;

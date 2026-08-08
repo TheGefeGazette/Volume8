@@ -37,7 +37,7 @@ export default async function PreviewEditionPage({
         .order("sort_order", { ascending: true });
 
     return (
-        <main className="edition-page">
+        <main className="edition-page preview-edition-page">
             <div className="preview-banner">
                 <strong>DRAFT PREVIEW — NOT PUBLISHED</strong>
 
@@ -56,72 +56,97 @@ export default async function PreviewEditionPage({
                     {edition.subtitle && <p>{edition.subtitle}</p>}
                 </header>
 
-                <div className="article-layout">
-                    <div className="article-column">
-                        {sectionsError && (
-                            <section className="story-section">
-                                <h3>Newsroom Error</h3>
-                                <p>We were unable to retrieve this edition’s articles.</p>
-                            </section>
-                        )}
+                <div className="preview-story-layout">
+                    {sectionsError && (
+                        <section className="story-section">
+                            <h3>Newsroom Error</h3>
+                            <p>We were unable to retrieve this edition’s articles.</p>
+                        </section>
+                    )}
 
-                        {!sectionsError && sections?.length === 0 && (
-                            <section className="story-section">
-                                <h3>No Articles Found</h3>
-                                <p>
-                                    This edition currently contains no copy worth embarrassing
-                                    the league with.
-                                </p>
-                            </section>
-                        )}
+                    {!sectionsError && sections?.length === 0 && (
+                        <section className="story-section">
+                            <h3>No Articles Found</h3>
+                            <p>
+                                This edition currently contains no copy worth embarrassing
+                                the league with.
+                            </p>
+                        </section>
+                    )}
 
-                        {!sectionsError &&
-                            sections?.map((section) => {
-                                const bodyHtml =
-                                    section.body_html || "<p>This section remains unwritten.</p>";
+                    {!sectionsError && sections && sections.length > 0 && (
+                        <>
+                            <div className="preview-opening-layout">
+                                <section className="story-section preview-welcome-story">
 
-                                const containsInlineImage = bodyHtml.includes("<img");
+                                    <aside className="edition-sidebar">
+                                        <div className="staff-note">
+                                            <span>Today&apos;s Newsroom</span>
+                                            <p>
+                                                The over-caffeinated C.H.U.D.s survived another deadline with
+                                                only minor structural damage.
+                                            </p>
+                                            <small>Optional prototype module</small>
+                                        </div>
 
-                                return (
-                                    <section className="story-section" key={section.id}>
-                                        <h3>{section.title}</h3>
+                                        <div className="optional-module">
+                                            <span>Optional Newspaper Detail</span>
+                                            <h4>Corrections</h4>
+                                            <p>
+                                                Last week&apos;s paper suggested someone had learned a lesson.
+                                                We regret the error.
+                                            </p>
+                                        </div>
+                                    </aside>
 
-                                        <div
-                                            className="story-body"
-                                            dangerouslySetInnerHTML={{ __html: bodyHtml }}
-                                        />
+                                    <div
+                                        className="story-body"
+                                        dangerouslySetInnerHTML={{
+                                            __html:
+                                                sections[0].body_html ||
+                                                "<p>This section remains unwritten.</p>",
+                                        }}
+                                    />
 
-                                        {section.gif_url && !containsInlineImage && (
+                                    {sections[0].gif_url &&
+                                        !(sections[0].body_html || "").includes("<img") && (
                                             <img
                                                 className="story-gif"
-                                                src={section.gif_url}
-                                                alt={`${section.title} GIF`}
+                                                src={sections[0].gif_url}
+                                                alt={`${sections[0].title} GIF`}
                                             />
                                         )}
-                                    </section>
-                                );
-                            })}
-                    </div>
+                                </section>
+                            </div>
+                            <div className="preview-full-width-stories">
+                                {sections.slice(1).map((section) => {
+                                    const bodyHtml =
+                                        section.body_html || "<p>This section remains unwritten.</p>";
 
-                    <aside className="edition-sidebar">
-                        <div className="staff-note">
-                            <span>Today&apos;s Newsroom</span>
-                            <p>
-                                The over-caffeinated C.H.U.D.s survived another deadline with
-                                only minor structural damage.
-                            </p>
-                            <small>Optional prototype module</small>
-                        </div>
+                                    const containsInlineImage = bodyHtml.includes("<img");
 
-                        <div className="optional-module">
-                            <span>Optional Newspaper Detail</span>
-                            <h4>Corrections</h4>
-                            <p>
-                                Last week&apos;s paper suggested someone had learned a lesson.
-                                We regret the error.
-                            </p>
-                        </div>
-                    </aside>
+                                    return (
+                                        <section className="story-section" key={section.id}>
+                                            <h3>{section.title}</h3>
+
+                                            <div
+                                                className="story-body"
+                                                dangerouslySetInnerHTML={{ __html: bodyHtml }}
+                                            />
+
+                                            {section.gif_url && !containsInlineImage && (
+                                                <img
+                                                    className="story-gif"
+                                                    src={section.gif_url}
+                                                    alt={`${section.title} GIF`}
+                                                />
+                                            )}
+                                        </section>
+                                    );
+                                })}
+                            </div>
+                        </>
+                    )}
                 </div>
             </article>
         </main>

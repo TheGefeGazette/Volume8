@@ -24,12 +24,12 @@ export default async function EditionPage({
 
   const { data: sections, error: sectionsError } = await supabase
     .from("edition_sections")
-    .select("id, title, slug, body_html, sort_order")
+    .select("id, title, slug, body_html, gif_url, sort_order")
     .eq("edition_id", edition.id)
     .order("sort_order", { ascending: true });
 
   return (
-    <main className="edition-page">
+    <main className="edition-page published-edition-page">
       <Link href="/" className="back-link">
         ← Fold the paper
       </Link>
@@ -44,67 +44,99 @@ export default async function EditionPage({
           {edition.subtitle && <p>{edition.subtitle}</p>}
         </header>
 
-        <div className="article-layout">
-          <div className="article-column">
-            {sectionsError && (
-              <section className="story-section">
-                <h3>Newsroom Error</h3>
-                <p>We were unable to retrieve this edition’s articles.</p>
-              </section>
-            )}
+        <div className="preview-story-layout">
+          {sectionsError && (
+            <section className="story-section">
+              <h3>Newsroom Error</h3>
+              <p>We were unable to retrieve this edition’s articles.</p>
+            </section>
+          )}
 
-            {!sectionsError && sections?.length === 0 && (
-              <section className="story-section">
-                <h3>No Articles Found</h3>
-                <p>
-                  This edition reached the presses without any copy, which is
-                  unfortunately consistent with newsroom standards.
-                </p>
-              </section>
-            )}
+          {!sectionsError && sections?.length === 0 && (
+            <section className="story-section">
+              <h3>No Articles Found</h3>
+              <p>
+                This edition reached the presses without any copy, which is
+                unfortunately consistent with newsroom standards.
+              </p>
+            </section>
+          )}
 
-            {!sectionsError &&
-              sections?.map((section, index) => (
-                <section className="story-section" key={section.id}>
-                  <h3>{section.title}</h3>
+          {!sectionsError && sections && sections.length > 0 && (
+            <>
+              <div className="preview-opening-layout">
+                <section className="story-section preview-welcome-story">
 
-                  <p
-                    className={index === 0 ? "dropcap" : undefined}
-                    style={{ whiteSpace: "pre-wrap" }}
-                  >
-                    {section.body_html || "This section remains unwritten."}
-                  </p>
+                  <aside className="edition-sidebar">
+                    <div className="staff-note">
+                      <span>Today&apos;s Newsroom</span>
+                      <p>
+                        The over-caffeinated C.H.U.D.s survived another deadline
+                        with only minor structural damage.
+                      </p>
+                      <small>Optional prototype module</small>
+                    </div>
+
+                    <div className="optional-module">
+                      <span>Optional Newspaper Detail</span>
+                      <h4>Corrections</h4>
+                      <p>
+                        Last week&apos;s paper suggested someone had learned a
+                        lesson. We regret the error.
+                      </p>
+                    </div>
+                  </aside>
 
                   <div
-                    className="gif-placeholder"
-                    role="img"
-                    aria-label={`${section.title} GIF placeholder`}
-                  >
-                    GIF punchline goes here
-                  </div>
+                    className="story-body"
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        sections[0].body_html ||
+                        "<p>This section remains unwritten.</p>",
+                    }}
+                  />
+
+                  {sections[0].gif_url &&
+                    !(sections[0].body_html || "").includes("<img") && (
+                      <img
+                        className="story-gif"
+                        src={sections[0].gif_url}
+                        alt={`${sections[0].title} GIF`}
+                      />
+                    )}
                 </section>
-              ))}
-          </div>
+              </div>
 
-          <aside className="edition-sidebar">
-            <div className="staff-note">
-              <span>Today&apos;s Newsroom</span>
-              <p>
-                The over-caffeinated C.H.U.D.s survived another deadline with
-                only minor structural damage.
-              </p>
-              <small>Optional prototype module</small>
-            </div>
+              <div className="preview-full-width-stories">
+                {sections.slice(1).map((section) => {
+                  const bodyHtml =
+                    section.body_html ||
+                    "<p>This section remains unwritten.</p>";
 
-            <div className="optional-module">
-              <span>Optional Newspaper Detail</span>
-              <h4>Corrections</h4>
-              <p>
-                Last week&apos;s paper suggested someone had learned a lesson.
-                We regret the error.
-              </p>
-            </div>
-          </aside>
+                  const containsInlineImage = bodyHtml.includes("<img");
+
+                  return (
+                    <section className="story-section" key={section.id}>
+                      <h3>{section.title}</h3>
+
+                      <div
+                        className="story-body"
+                        dangerouslySetInnerHTML={{ __html: bodyHtml }}
+                      />
+
+                      {section.gif_url && !containsInlineImage && (
+                        <img
+                          className="story-gif"
+                          src={section.gif_url}
+                          alt={`${section.title} GIF`}
+                        />
+                      )}
+                    </section>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </article>
     </main>

@@ -1,5 +1,6 @@
 "use client";
 
+import TextAlign from "@tiptap/extension-text-align";
 import { useRef, useState } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -52,6 +53,9 @@ export function GazetteRichTextEditor({
                 inline: false,
                 allowBase64: false,
             }),
+            TextAlign.configure({
+                types: ["heading", "paragraph"],
+            }),
         ],
         content: preparedContent,
         immediatelyRender: false,
@@ -100,6 +104,30 @@ export function GazetteRichTextEditor({
                     }
                 >
                     Heading
+                </button>
+
+                <button
+                    type="button"
+                    className={editor.isActive({ textAlign: "left" }) ? "is-active" : ""}
+                    onClick={() => editor.chain().focus().setTextAlign("left").run()}
+                >
+                    Left
+                </button>
+
+                <button
+                    type="button"
+                    className={editor.isActive({ textAlign: "center" }) ? "is-active" : ""}
+                    onClick={() => editor.chain().focus().setTextAlign("center").run()}
+                >
+                    Center
+                </button>
+
+                <button
+                    type="button"
+                    className={editor.isActive({ textAlign: "right" }) ? "is-active" : ""}
+                    onClick={() => editor.chain().focus().setTextAlign("right").run()}
+                >
+                    Right
                 </button>
 
                 <div
@@ -163,6 +191,6 @@ export function GazetteRichTextEditor({
             </div>
 
             <EditorContent editor={editor} />
-        </div>
+        </div >
     );
 }

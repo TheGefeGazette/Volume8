@@ -1504,3 +1504,87 @@ a {
   font-size: 0.78rem;
   color: #8f8175;
 }
+
+/* ---------- Preview Newspaper Story Layout ---------- */
+
+.preview-story-layout {
+  max-width: 1020px;
+  margin: 45px auto 0;
+}
+
+.preview-opening-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 48px;
+  align-items: start;
+}
+
+.preview-opening-layout .story-section {
+  min-width: 0;
+}
+
+.preview-opening-layout .edition-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.preview-full-width-stories {
+  width: 100%;
+}
+
+.preview-full-width-stories .story-section {
+  width: 100%;
+}
+
+@media (max-width: 850px) {
+  .preview-opening-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-opening-layout .edition-sidebar {
+    order: 2;
+  }
+}
+
+.preview-edition-page .story-section>h3 {
+  text-align: center;
+}
+
+/* ---------- Welcome Newspaper Flow ---------- */
+
+.preview-opening-layout {
+  display: block;
+}
+
+.preview-welcome-story {
+  display: flow-root;
+}
+
+.preview-welcome-story .edition-sidebar {
+  float: right;
+  width: 280px;
+  margin: 0 0 28px 48px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.preview-welcome-story .story-body {
+  display: block;
+}
+
+/* Center article headlines */
+.preview-edition-page .story-section>h3,
+.published-edition-page .story-section>h3 {
+  text-align: center;
+}
+
+@media (max-width: 850px) {
+  .preview-welcome-story .edition-sidebar {
+    float: none;
+    width: 100%;
+    margin: 0 0 28px;
+  }
+}
