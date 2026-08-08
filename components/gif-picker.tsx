@@ -77,7 +77,7 @@ export function GifPicker({
                 </div>
             ) : (
                 <button type="button" onClick={() => setIsOpen(true)}>
-                    + Add GIF punchline
+                    GIF
                 </button>
             )}
 

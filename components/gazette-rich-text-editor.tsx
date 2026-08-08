@@ -5,6 +5,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import { GifPicker } from "@/components/gif-picker";
+import { PictureUpload } from "@/components/picture-upload";
 
 type GazetteRichTextEditorProps = {
     fieldName: string;
@@ -115,6 +116,25 @@ export function GazetteRichTextEditor({
                                 .setImage({
                                     src: gifUrl,
                                     alt: "Gazette GIF punchline",
+                                })
+                                .run();
+                        }}
+                    />
+                </div>
+                <div
+                    onMouseDown={() => {
+                        savedCursorPosition.current = editor.state.selection.from;
+                    }}
+                >
+                    <PictureUpload
+                        onPictureUploaded={(imageUrl) => {
+                            editor
+                                .chain()
+                                .focus()
+                                .setTextSelection(savedCursorPosition.current)
+                                .setImage({
+                                    src: imageUrl,
+                                    alt: "Gazette picture",
                                 })
                                 .run();
                         }}

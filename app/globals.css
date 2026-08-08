@@ -1155,12 +1155,21 @@ a {
 }
 
 .gazette-rich-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  padding: 12px;
-  border-bottom: 1px solid #8a8178;
+  align-items: center;
+  gap: 6px;
+
+  padding: 10px 12px;
+
   background: var(--paper-deep);
+  border-bottom: 1px solid #8a8178;
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
 }
 
 .gazette-rich-toolbar button {
