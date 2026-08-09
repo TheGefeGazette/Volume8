@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export async function deleteDraft(formData: FormData) {
+export async function deleteEdition(formData: FormData) {
     const supabase = await createClient();
 
     const {
@@ -26,7 +26,7 @@ export async function deleteDraft(formData: FormData) {
 
     const { data: edition, error: lookupError } = await supabase
         .from("editions")
-        .select("id, status")
+        .select("id, title, status")
         .eq("id", editionId)
         .single();
 
@@ -38,15 +38,32 @@ export async function deleteDraft(formData: FormData) {
         );
     }
 
-    if (edition.status !== "draft") {
-        redirect("/offices?error=Only draft editions can be deleted.");
+    const { error: matchupsError } = await supabase
+        .from("edition_matchups")
+        .delete()
+        .eq("edition_id", editionId);
+
+    if (matchupsError) {
+        redirect(
+            `/offices?error=${encodeURIComponent(matchupsError.message)}`
+        );
+    }
+
+    const { error: sectionsError } = await supabase
+        .from("edition_sections")
+        .delete()
+        .eq("edition_id", editionId);
+
+    if (sectionsError) {
+        redirect(
+            `/offices?error=${encodeURIComponent(sectionsError.message)}`
+        );
     }
 
     const { error: deleteError } = await supabase
         .from("editions")
         .delete()
-        .eq("id", editionId)
-        .eq("status", "draft");
+        .eq("id", editionId);
 
     if (deleteError) {
         redirect(
@@ -55,7 +72,12 @@ export async function deleteDraft(formData: FormData) {
     }
 
     revalidatePath("/offices");
-    redirect("/offices?success=Draft deleted");
+
+    redirect(
+        `/offices?success=${encodeURIComponent(
+            `${edition.status === "draft" ? "Draft" : "Published edition"} deleted`
+        )}`
+    );
 }
 
 export async function copyEdition(formData: FormData) {

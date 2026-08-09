@@ -16,7 +16,6 @@ type MatchupsEditorProps = {
         headline: string | null;
         body_html: string | null;
         sort_order: number | null;
-
     }[];
 };
 
@@ -29,8 +28,10 @@ export function MatchupsEditor({
     return (
         <div className="matchups-editor">
             <p className="matchup-prototype-note">
-                {matchups.length} structured matchup{matchups.length === 1 ? "" : "s"} loaded
+                {matchups.length} structured matchup
+                {matchups.length === 1 ? "" : "s"} loaded
             </p>
+
             <div className="matchups-editor-header">
                 <div>
                     <p className="eyebrow">Matchup Desk</p>
@@ -47,72 +48,97 @@ export function MatchupsEditor({
                 </button>
             </div>
 
-            <div className="matchup-entry">
-                <div className="matchup-number">Matchup 1</div>
+            {matchups.length === 0 ? (
+                <div className="matchup-entry">
+                    <p className="matchup-prototype-note">
+                        No matchups added yet. Click + Add Matchup to create one.
+                    </p>
 
-                <div className="matchup-fields">
-                    <label>
-                        Winner
-                        <input
-                            type="text"
-                            placeholder="Winner"
-                            disabled
-                        />
-                    </label>
-
-                    <label>
-                        Loser
-                        <input
-                            type="text"
-                            placeholder="Loser"
-                            disabled
-                        />
-                    </label>
-
-                    <label>
-                        Winner Score
-                        <input
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            disabled
-                        />
-                    </label>
-
-                    <label>
-                        Loser Score
-                        <input
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            disabled
-                        />
-                    </label>
-                </div>
-
-                <label className="matchup-headline">
-                    Matchup Headline
                     <input
-                        type="text"
-                        placeholder="Write a headline for this matchup..."
-                        disabled
-                    />
-                </label>
-
-                <div className="matchup-recap">
-                    <span>Recap</span>
-
-                    <GazetteRichTextEditor
-                        fieldName={fieldName}
-                        initialContent={initialContent}
+                        type="hidden"
+                        name={fieldName}
+                        value={initialContent}
+                        readOnly
                     />
                 </div>
+            ) : (
+                matchups.map((matchup, index) => (
+                    <div className="matchup-entry" key={matchup.id}>
+                        <div className="matchup-number">
+                            Matchup {index + 1}
+                        </div>
 
-                <p className="matchup-prototype-note">
-                    Winner, loser, scores, headline, and Add Matchup will be activated
-                    after this layout is connected to the matchup database.
-                </p>
-            </div>
+                        <input
+                            type="hidden"
+                            name={`matchupId:${matchup.id}`}
+                            value={matchup.id}
+                        />
+
+                        <div className="matchup-fields">
+                            <label>
+                                Winner
+                                <input
+                                    type="text"
+                                    name={`matchupWinner:${matchup.id}`}
+                                    defaultValue={matchup.winner ?? ""}
+                                    placeholder="Winner"
+                                />
+                            </label>
+
+                            <label>
+                                Loser
+                                <input
+                                    type="text"
+                                    name={`matchupLoser:${matchup.id}`}
+                                    defaultValue={matchup.loser ?? ""}
+                                    placeholder="Loser"
+                                />
+                            </label>
+
+                            <label>
+                                Winner Score
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    name={`matchupWinnerScore:${matchup.id}`}
+                                    defaultValue={matchup.winner_score ?? ""}
+                                    placeholder="0.00"
+                                />
+                            </label>
+
+                            <label>
+                                Loser Score
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    name={`matchupLoserScore:${matchup.id}`}
+                                    defaultValue={matchup.loser_score ?? ""}
+                                    placeholder="0.00"
+                                />
+                            </label>
+                        </div>
+
+                        <label className="matchup-headline">
+                            Matchup Headline
+                            <input
+                                type="text"
+                                name={`matchupHeadline:${matchup.id}`}
+                                defaultValue={matchup.headline ?? ""}
+                                placeholder="Write a headline for this matchup..."
+                            />
+                        </label>
+
+                        <div className="matchup-recap">
+                            <span>Recap</span>
+
+                            <GazetteRichTextEditor
+                                fieldName={`matchupBody:${matchup.id}`}
+                                initialContent={matchup.body_html ?? ""}
+                            />
+                        </div>
+                    </div>
+                ))
+            )}
         </div>
     );
 }

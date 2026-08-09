@@ -139,6 +139,78 @@ export async function saveDraft(formData: FormData) {
         return null;
     }
 
+    async function saveMatchups(targetEditionId: string) {
+        const matchupIdEntries = Array.from(formData.entries()).filter(
+            ([key]) => key.startsWith("matchupId:")
+        );
+
+        for (const [key, value] of matchupIdEntries) {
+            const matchupId = key.replace("matchupId:", "");
+
+            if (!matchupId || typeof value !== "string") {
+                continue;
+            }
+
+            const winnerValue = formData.get(`matchupWinner:${matchupId}`);
+            const loserValue = formData.get(`matchupLoser:${matchupId}`);
+            const winnerScoreValue = formData.get(
+                `matchupWinnerScore:${matchupId}`
+            );
+            const loserScoreValue = formData.get(
+                `matchupLoserScore:${matchupId}`
+            );
+            const headlineValue = formData.get(
+                `matchupHeadline:${matchupId}`
+            );
+            const bodyValue = formData.get(`matchupBody:${matchupId}`);
+
+            const winner =
+                typeof winnerValue === "string" ? winnerValue.trim() : "";
+
+            const loser =
+                typeof loserValue === "string" ? loserValue.trim() : "";
+
+            const headline =
+                typeof headlineValue === "string"
+                    ? headlineValue.trim()
+                    : "";
+
+            const bodyHtml =
+                typeof bodyValue === "string" ? bodyValue.trim() : "";
+
+            const winnerScore =
+                typeof winnerScoreValue === "string" &&
+                    winnerScoreValue.trim() !== ""
+                    ? Number(winnerScoreValue)
+                    : null;
+
+            const loserScore =
+                typeof loserScoreValue === "string" &&
+                    loserScoreValue.trim() !== ""
+                    ? Number(loserScoreValue)
+                    : null;
+
+            const { error: updateError } = await supabase
+                .from("edition_matchups")
+                .update({
+                    winner,
+                    loser,
+                    winner_score: winnerScore,
+                    loser_score: loserScore,
+                    headline,
+                    body_html: bodyHtml,
+                })
+                .eq("id", matchupId)
+                .eq("edition_id", targetEditionId);
+
+            if (updateError) {
+                return updateError;
+            }
+        }
+
+        return null;
+    }
+
     if (editionId) {
         const { error } = await supabase
             .from("editions")
@@ -187,6 +259,17 @@ export async function saveDraft(formData: FormData) {
                 )}`
             );
         }
+
+        const matchupSaveError = await saveMatchups(editionId);
+
+        if (matchupSaveError) {
+            redirect(
+                `/offices/editions/new?edition=${editionId}&section=matchups&error=${encodeURIComponent(
+                    matchupSaveError.message
+                )}`
+            );
+        }
+
         redirect(
             `/offices/editions/new?edition=${editionId}&section=${encodeURIComponent(
                 activeSection
@@ -409,5 +492,119 @@ export async function addMatchup(formData: FormData) {
         `/offices/editions/new?edition=${editionId}&section=matchups&success=${encodeURIComponent(
             "Matchup added"
         )}`
+    );
+}
+
+export async function deleteStory(
+    editionId: string,
+    storySlug: string,
+    formData: FormData
+) {
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        redirect("/offices/login");
+    }
+
+    if (!editionId || !storySlug) {
+        redirect(
+            `/offices/editions/new?edition=${editionId}&error=${encodeURIComponent(
+                "We could not identify the story to delete."
+            )}`
+        );
+    }
+
+    const { error: deleteError } = await supabase
+        .from("edition_sections")
+        .delete()
+        .eq("edition_id", editionId)
+        .eq("slug", storySlug)
+        .eq("section_type", "custom");
+
+    if (deleteError) {
+        redirect(
+            `/offices/editions/new?edition=${editionId}&section=${encodeURIComponent(
+                storySlug
+            )}&error=${encodeURIComponent(deleteError.message)}`
+        );
+    }
+
+    redirect(
+        `/offices/editions/new?edition=${editionId}&section=welcome&success=${encodeURIComponent(
+            "Story deleted"
+        )}`
+    );
+}
+
+export async function deleteEdition(editionId: string) {
+    if (!editionId) {
+        redirect(
+            `/offices/editions/new?error=${encodeURIComponent(
+                "We could not identify the edition to delete."
+            )}`
+        );
+    }
+
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        redirect(
+            `/offices/login?error=${encodeURIComponent(
+                "You must be signed in to delete an edition."
+            )}`
+        );
+    }
+
+    const { error: matchupsError } = await supabase
+        .from("edition_matchups")
+        .delete()
+        .eq("edition_id", editionId);
+
+    if (matchupsError) {
+        redirect(
+            `/offices/editions/new?edition=${editionId}&error=${encodeURIComponent(
+                matchupsError.message
+            )}`
+        );
+    }
+
+    const { error: sectionsError } = await supabase
+        .from("edition_sections")
+        .delete()
+        .eq("edition_id", editionId);
+
+    if (sectionsError) {
+        redirect(
+            `/offices/editions/new?edition=${editionId}&error=${encodeURIComponent(
+                sectionsError.message
+            )}`
+        );
+    }
+
+    const { error: editionError } = await supabase
+        .from("editions")
+        .delete()
+        .eq("id", editionId);
+
+    if (editionError) {
+        redirect(
+            `/offices/editions/new?edition=${editionId}&error=${encodeURIComponent(
+                editionError.message
+            )}`
+        );
+    }
+
+    redirect(
+        `/offices/editions/new?success=${encodeURIComponent("Edition deleted")}`
     );
 }

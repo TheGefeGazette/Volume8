@@ -1,7 +1,10 @@
 "use client";
 
 import { MatchupsEditor } from "@/components/matchups-editor";
-import { addStory } from "@/app/offices/editions/new/actions";
+import {
+    addStory,
+    deleteStory,
+} from "@/app/offices/editions/new/actions";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { GazetteRichTextEditor } from "@/components/gazette-rich-text-editor";
 import { GifPicker } from "@/components/gif-picker";
@@ -129,6 +132,19 @@ export function SectionEditorTabs({
                         <div className="editor-paper">
                             <p className="eyebrow">{section.title}</p>
                             <h2>{section.heading}</h2>
+
+                            {customSections.some(
+                                (customSection) => customSection.slug === section.slug
+                            ) && editionId && (
+                                    <button
+                                        type="submit"
+                                        className="office-secondary"
+                                        formAction={deleteStory.bind(null, editionId, section.slug)}
+
+                                    >
+                                        Delete Story
+                                    </button>
+                                )}
 
                             {section.slug === "matchups" ? (
                                 <MatchupsEditor
