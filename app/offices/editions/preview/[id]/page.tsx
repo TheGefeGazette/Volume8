@@ -45,6 +45,14 @@ export default async function PreviewEditionPage({
         .eq("edition_id", edition.id)
         .order("sort_order", { ascending: true });
 
+    const { data: picks, error: picksError } = await supabase
+        .from("edition_picks")
+        .select(
+            "id, favorite, joke_text, underdog, sort_order"
+        )
+        .eq("edition_id", edition.id)
+        .order("sort_order", { ascending: true });
+
     return (
         <main className="edition-page preview-edition-page">
             <div className="preview-banner">
@@ -164,35 +172,65 @@ export default async function PreviewEditionPage({
                                                                 loserScore={matchup.loser_score}
                                                                 bodyHtml={matchup.body_html}
                                                             />
-                                                        ))}                                                             
-                                                      
-                                        </div>
-                                    ) : (
-                                <>
-                                    <div
-                                        className="story-body"
-                                        dangerouslySetInnerHTML={{
-                                            __html: bodyHtml,
-                                        }}
-                                    />
+                                                        ))}
+                                                </div>
+                                            ) : section.slug === "next-weeks-picks" ? (
+                                                <div className="structured-picks-preview">
+                                                    {picksError && (
+                                                        <p>
+                                                            We were unable to retrieve next week&apos;s picks.
+                                                        </p>
+                                                    )}
 
-                                    {section.gif_url && !containsInlineImage && (
-                                        <img
-                                            className="story-gif"
-                                            src={section.gif_url}
-                                            alt={`${section.title} GIF`}
-                                        />
-                                    )}
-                                </>
+                                                    {!picksError &&
+                                                        (!picks || picks.length === 0) && (
+                                                            <p>
+                                                                No picks have been added yet.
+                                                            </p>
+                                                        )}
+
+                                                    {!picksError &&
+                                                        picks?.map((pick) => (
+                                                            <p
+                                                                className="pick-preview-line"
+                                                                key={pick.id}
+                                                            >
+                                                                <strong>
+                                                                    {pick.favorite || "Favorite"}
+                                                                </strong>{" "}
+                                                                {pick.joke_text || "does something unpleasant to"}{" "}
+                                                                <strong>
+                                                                    {pick.underdog || "Underdog"}
+                                                                </strong>.
+                                                            </p>
+                                                        ))}
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <div
+                                                        className="story-body"
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: bodyHtml,
+                                                        }}
+                                                    />
+
+                                                    {section.gif_url && !containsInlineImage && (
+                                                        <img
+                                                            className="story-gif"
+                                                            src={section.gif_url}
+                                                            alt={`${section.title} GIF`}
+                                                        />
+                                                    )}
+                                                </>
                                             )}
-                            </section>
-                            );
+                                        </section>
+                                    );
                                 })}
-                        </div>
-                </>
+                            </div>
+                        </>
                     )}
-            </div>
-        </article>
+                </div>
+            </article>
         </main >
     );
 }

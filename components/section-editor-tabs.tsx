@@ -9,6 +9,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { GazetteRichTextEditor } from "@/components/gazette-rich-text-editor";
 import { GifPicker } from "@/components/gif-picker";
 import { editionSections } from "@/lib/gazette/edition-sections";
+import { PicksEditor } from "@/components/picks-editor";
 
 type SectionEditorTabsProps = {
     savedSectionBodies: Record<string, string>;
@@ -30,6 +31,13 @@ type SectionEditorTabsProps = {
         body_html: string | null;
         sort_order: number | null;
     }[];
+    savedPicks: {
+        id: number;
+        favorite: string | null;
+        joke_text: string | null;
+        underdog: string | null;
+        sort_order: number | null;
+    }[];
 };
 
 export function SectionEditorTabs({
@@ -39,13 +47,23 @@ export function SectionEditorTabs({
     editionId,
     customSections = [],
     savedMatchups,
+    savedPicks,
 }: SectionEditorTabsProps) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
+    const regularSections = editionSections.filter(
+        (section) => section.slug !== "next-weeks-picks"
+    );
+
+    const nextWeeksPicksSection = editionSections.find(
+        (section) => section.slug === "next-weeks-picks"
+    );
+
     const allSections = [
-        ...editionSections,
+        ...regularSections,
+
         ...customSections.map((section) => ({
             title: section.title,
             heading: section.title,
@@ -54,6 +72,8 @@ export function SectionEditorTabs({
             placeholder: `Write ${section.title}...`,
             sortOrder: section.sortOrder,
         })),
+
+        ...(nextWeeksPicksSection ? [nextWeeksPicksSection] : []),
     ];
 
     const sectionFromUrl = searchParams.get("section");
@@ -145,13 +165,17 @@ export function SectionEditorTabs({
                                         Delete Story
                                     </button>
                                 )}
-
                             {section.slug === "matchups" ? (
                                 <MatchupsEditor
                                     fieldName={section.fieldName}
                                     initialContent={savedSectionBodies[section.slug] ?? ""}
                                     editionId={editionId}
                                     matchups={savedMatchups}
+                                />
+                            ) : section.slug === "next-weeks-picks" ? (
+                                <PicksEditor
+                                    editionId={editionId}
+                                    picks={savedPicks}
                                 />
                             ) : (
                                 <GazetteRichTextEditor

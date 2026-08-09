@@ -34,4 +34,13 @@ export const editionSections = [
             "Recap this week's matchups, questionable decisions, and unnecessary drama...",
         sortOrder: 3,
     },
+    {
+        title: "Next Week's Picks",
+        heading: "Next Week's Picks",
+        slug: "next-weeks-picks",
+        fieldName: "nextWeeksPicksBody",
+        placeholder:
+            "Write next week's picks...",
+        sortOrder: 4,
+    },
 ];

@@ -211,6 +211,55 @@ export async function saveDraft(formData: FormData) {
         return null;
     }
 
+    async function savePicks(targetEditionId: string) {
+        const favoriteEntries = Array.from(formData.entries()).filter(
+            ([key]) => key.startsWith("pickFavorite:")
+        );
+
+        for (const [key] of favoriteEntries) {
+            const pickId = key.replace("pickFavorite:", "");
+
+            if (!pickId) {
+                continue;
+            }
+
+            const favoriteValue = formData.get(`pickFavorite:${pickId}`);
+            const jokeValue = formData.get(`pickJoke:${pickId}`);
+            const underdogValue = formData.get(`pickUnderdog:${pickId}`);
+
+            const favorite =
+                typeof favoriteValue === "string"
+                    ? favoriteValue.trim()
+                    : "";
+
+            const jokeText =
+                typeof jokeValue === "string"
+                    ? jokeValue.trim()
+                    : "";
+
+            const underdog =
+                typeof underdogValue === "string"
+                    ? underdogValue.trim()
+                    : "";
+
+            const { error: updateError } = await supabase
+                .from("edition_picks")
+                .update({
+                    favorite,
+                    joke_text: jokeText,
+                    underdog,
+                })
+                .eq("id", pickId)
+                .eq("edition_id", targetEditionId);
+
+            if (updateError) {
+                return updateError;
+            }
+        }
+
+        return null;
+    }
+
     if (editionId) {
         const { error } = await supabase
             .from("editions")
@@ -266,6 +315,16 @@ export async function saveDraft(formData: FormData) {
             redirect(
                 `/offices/editions/new?edition=${editionId}&section=matchups&error=${encodeURIComponent(
                     matchupSaveError.message
+                )}`
+            );
+        }
+
+        const picksSaveError = await savePicks(editionId);
+
+        if (picksSaveError) {
+            redirect(
+                `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&error=${encodeURIComponent(
+                    picksSaveError.message
                 )}`
             );
         }
@@ -536,6 +595,74 @@ export async function deleteMatchup(
     redirect(
         `/offices/editions/new?edition=${editionId}&section=matchups&success=${encodeURIComponent(
             "Matchup deleted"
+        )}`
+    );
+}
+
+export async function addPick(formData: FormData) {
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        redirect("/offices/login");
+    }
+
+    const editionIdValue = formData.get("editionId");
+
+    const editionId =
+        typeof editionIdValue === "string" ? editionIdValue.trim() : "";
+
+    if (!editionId) {
+        redirect(
+            `/offices/editions/new?error=${encodeURIComponent(
+                "Save the edition before adding a pick."
+            )}`
+        );
+    }
+
+    const { data: existingPicks, error: lookupError } = await supabase
+        .from("edition_picks")
+        .select("sort_order")
+        .eq("edition_id", editionId)
+        .order("sort_order", { ascending: false })
+        .limit(1);
+
+    if (lookupError) {
+        redirect(
+            `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&error=${encodeURIComponent(
+                lookupError.message
+            )}`
+        );
+    }
+
+    const highestSortOrder =
+        existingPicks?.[0]?.sort_order ?? -1;
+
+    const { error: insertError } = await supabase
+        .from("edition_picks")
+        .insert({
+            edition_id: editionId,
+            favorite: "",
+            joke_text: "",
+            underdog: "",
+            sort_order: highestSortOrder + 1,
+        });
+
+    if (insertError) {
+        redirect(
+            `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&error=${encodeURIComponent(
+                insertError.message
+            )}`
+        );
+    }
+
+    redirect(
+        `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&success=${encodeURIComponent(
+            "Pick added"
         )}`
     );
 }

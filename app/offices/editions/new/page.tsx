@@ -34,6 +34,14 @@ export default async function NewEditionPage({
     sort_order: number | null;
   }[] = [];
 
+  let savedPicks: {
+    id: number;
+    favorite: string | null;
+    joke_text: string | null;
+    underdog: string | null;
+    sort_order: number | null;
+  }[] = [];
+
   let savedEdition: {
     title: string;
     subtitle: string | null;
@@ -97,6 +105,15 @@ export default async function NewEditionPage({
       .order("sort_order", { ascending: true });
 
     savedMatchups = matchupData ?? [];
+    const { data: picksData } = await supabase
+      .from("edition_picks")
+      .select(
+        "id, favorite, joke_text, underdog, sort_order"
+      )
+      .eq("edition_id", editionId)
+      .order("sort_order", { ascending: true });
+
+    savedPicks = picksData ?? [];
   }
   return (
     <form key={editionId ?? "new"} action={saveDraft}>
@@ -188,6 +205,7 @@ export default async function NewEditionPage({
             editionId={editionId}
             customSections={customSections}
             savedMatchups={savedMatchups}
+            savedPicks={savedPicks}
           />
 
           <aside className="tool-drawer">
