@@ -23,6 +23,17 @@ export default async function NewEditionPage({
     section: activeSection,
   } = await searchParams;
 
+  let savedMatchups: {
+    id: string;
+    winner: string | null;
+    loser: string | null;
+    winner_score: number | null;
+    loser_score: number | null;
+    headline: string | null;
+    body_html: string | null;
+    sort_order: number | null;
+  }[] = [];
+
   let savedEdition: {
     title: string;
     subtitle: string | null;
@@ -76,6 +87,16 @@ export default async function NewEditionPage({
         sortOrder: section.sort_order ?? 100,
       }))
       .sort((a, b) => a.sortOrder - b.sortOrder);
+
+    const { data: matchupData } = await supabase
+      .from("edition_matchups")
+      .select(
+        "id, winner, loser, winner_score, loser_score, headline, body_html, sort_order"
+      )
+      .eq("edition_id", editionId)
+      .order("sort_order", { ascending: true });
+
+    savedMatchups = matchupData ?? [];
   }
   return (
     <form key={editionId ?? "new"} action={saveDraft}>
@@ -166,6 +187,7 @@ export default async function NewEditionPage({
             initialActiveSlug={activeSection}
             editionId={editionId}
             customSections={customSections}
+            savedMatchups={savedMatchups}
           />
 
           <aside className="tool-drawer">

@@ -340,3 +340,74 @@ export async function addStory(formData: FormData) {
         )}&success=${encodeURIComponent("Story added")}`
     );
 }
+
+export async function addMatchup(formData: FormData) {
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        redirect("/offices/login");
+    }
+
+    const editionIdValue = formData.get("editionId");
+
+    const editionId =
+        typeof editionIdValue === "string" ? editionIdValue.trim() : "";
+
+    if (!editionId) {
+        redirect(
+            `/offices/editions/new?error=${encodeURIComponent(
+                "Save the edition before adding a matchup."
+            )}`
+        );
+    }
+
+    const { data: existingMatchups, error: lookupError } = await supabase
+        .from("edition_matchups")
+        .select("sort_order")
+        .eq("edition_id", editionId)
+        .order("sort_order", { ascending: false })
+        .limit(1);
+
+    if (lookupError) {
+        redirect(
+            `/offices/editions/new?edition=${editionId}&section=matchups&error=${encodeURIComponent(
+                lookupError.message
+            )}`
+        );
+    }
+
+    const highestSortOrder =
+        existingMatchups?.[0]?.sort_order ?? -1;
+
+    const { error: insertError } = await supabase
+        .from("edition_matchups")
+        .insert({
+            edition_id: editionId,
+            winner: "",
+            loser: "",
+            winner_score: null,
+            loser_score: null,
+            headline: "",
+            body_html: "",
+            sort_order: highestSortOrder + 1,
+        });
+
+    if (insertError) {
+        redirect(
+            `/offices/editions/new?edition=${editionId}&section=matchups&error=${encodeURIComponent(
+                insertError.message
+            )}`
+        );
+    }
+
+    redirect(
+        `/offices/editions/new?edition=${editionId}&section=matchups&success=${encodeURIComponent(
+            "Matchup added"
+        )}`
+    );
+}

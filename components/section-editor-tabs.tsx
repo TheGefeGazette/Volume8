@@ -1,5 +1,6 @@
 "use client";
 
+import { MatchupsEditor } from "@/components/matchups-editor";
 import { addStory } from "@/app/offices/editions/new/actions";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { GazetteRichTextEditor } from "@/components/gazette-rich-text-editor";
@@ -16,6 +17,16 @@ type SectionEditorTabsProps = {
         slug: string;
         sortOrder: number;
     }[];
+    savedMatchups: {
+        id: string;
+        winner: string | null;
+        loser: string | null;
+        winner_score: number | null;
+        loser_score: number | null;
+        headline: string | null;
+        body_html: string | null;
+        sort_order: number | null;
+    }[];
 };
 
 export function SectionEditorTabs({
@@ -24,6 +35,7 @@ export function SectionEditorTabs({
     initialActiveSlug,
     editionId,
     customSections = [],
+    savedMatchups,
 }: SectionEditorTabsProps) {
     const router = useRouter();
     const pathname = usePathname();
@@ -119,11 +131,11 @@ export function SectionEditorTabs({
                             <h2>{section.heading}</h2>
 
                             {section.slug === "matchups" ? (
-                                <textarea
-                                    name={section.fieldName}
-                                    defaultValue={savedSectionBodies[section.slug] ?? ""}
-                                    rows={10}
-                                    placeholder={section.placeholder}
+                                <MatchupsEditor
+                                    fieldName={section.fieldName}
+                                    initialContent={savedSectionBodies[section.slug] ?? ""}
+                                    editionId={editionId}
+                                    matchups={savedMatchups}
                                 />
                             ) : (
                                 <GazetteRichTextEditor
