@@ -28,6 +28,14 @@ export default async function EditionPage({
     .eq("edition_id", edition.id)
     .order("sort_order", { ascending: true });
 
+  const { data: matchups, error: matchupsError } = await supabase
+    .from("edition_matchups")
+    .select(
+      "id, winner, loser, winner_score, loser_score, headline, body_html, sort_order"
+    )
+    .eq("edition_id", edition.id)
+    .order("sort_order", { ascending: true });
+
   return (
     <main className="edition-page published-edition-page">
       <Link href="/" className="back-link">
@@ -119,17 +127,72 @@ export default async function EditionPage({
                     <section className="story-section" key={section.id}>
                       <h3>{section.title}</h3>
 
-                      <div
-                        className="story-body"
-                        dangerouslySetInnerHTML={{ __html: bodyHtml }}
-                      />
+                      {section.slug === "matchups" ? (
+                        <div className="structured-matchups-preview">
+                          {matchupsError && (
+                            <p>We were unable to retrieve the matchup desk records.</p>
+                          )}
 
-                      {section.gif_url && !containsInlineImage && (
-                        <img
-                          className="story-gif"
-                          src={section.gif_url}
-                          alt={`${section.title} GIF`}
-                        />
+                          {!matchupsError && (!matchups || matchups.length === 0) && (
+                            <p>No structured matchups have been added yet.</p>
+                          )}
+
+                          {!matchupsError &&
+                            matchups?.map((matchup) => (
+                              <article
+                                className="structured-matchup-story"
+                                key={matchup.id}
+                              >
+                                {matchup.headline && (
+                                  <h4>{matchup.headline}</h4>
+                                )}
+
+                                <div className="structured-scoreline">
+                                  <div>
+                                    <strong>
+                                      {matchup.winner || "Winner"}
+                                    </strong>
+                                    <span>
+                                      {matchup.winner_score ?? "—"}
+                                    </span>
+                                  </div>
+
+                                  <div>
+                                    <strong>
+                                      {matchup.loser || "Loser"}
+                                    </strong>
+                                    <span>
+                                      {matchup.loser_score ?? "—"}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div
+                                  className="story-body"
+                                  dangerouslySetInnerHTML={{
+                                    __html:
+                                      matchup.body_html ||
+                                      "<p>This matchup recap remains unwritten.</p>",
+                                  }}
+                                />
+                              </article>
+                            ))}
+                        </div>
+                      ) : (
+                        <>
+                          <div
+                            className="story-body"
+                            dangerouslySetInnerHTML={{ __html: bodyHtml }}
+                          />
+
+                          {section.gif_url && !containsInlineImage && (
+                            <img
+                              className="story-gif"
+                              src={section.gif_url}
+                              alt={`${section.title} GIF`}
+                            />
+                          )}
+                        </>
                       )}
                     </section>
                   );
