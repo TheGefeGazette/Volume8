@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Masthead } from "@/components/masthead";
 import { createClient } from "@/lib/supabase/server";
+import { MatchupStory } from "@/components/matchup-story";
 
 export default async function EditionPage({
   params,
@@ -139,43 +140,15 @@ export default async function EditionPage({
 
                           {!matchupsError &&
                             matchups?.map((matchup) => (
-                              <article
-                                className="structured-matchup-story"
+                              <MatchupStory
                                 key={matchup.id}
-                              >
-                                {matchup.headline && (
-                                  <h4>{matchup.headline}</h4>
-                                )}
-
-                                <div className="structured-scoreline">
-                                  <div>
-                                    <strong>
-                                      {matchup.winner || "Winner"}
-                                    </strong>
-                                    <span>
-                                      {matchup.winner_score ?? "—"}
-                                    </span>
-                                  </div>
-
-                                  <div>
-                                    <strong>
-                                      {matchup.loser || "Loser"}
-                                    </strong>
-                                    <span>
-                                      {matchup.loser_score ?? "—"}
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div
-                                  className="story-body"
-                                  dangerouslySetInnerHTML={{
-                                    __html:
-                                      matchup.body_html ||
-                                      "<p>This matchup recap remains unwritten.</p>",
-                                  }}
-                                />
-                              </article>
+                                headline={matchup.headline}
+                                winner={matchup.winner}
+                                loser={matchup.loser}
+                                winnerScore={matchup.winner_score}
+                                loserScore={matchup.loser_score}
+                                bodyHtml={matchup.body_html}
+                              />
                             ))}
                         </div>
                       ) : (

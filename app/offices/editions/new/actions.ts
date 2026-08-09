@@ -495,6 +495,51 @@ export async function addMatchup(formData: FormData) {
     );
 }
 
+export async function deleteMatchup(
+    editionId: string,
+    matchupId: string,
+    formData: FormData
+) {
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        redirect("/offices/login");
+    }
+
+    if (!editionId || !matchupId) {
+        redirect(
+            `/offices/editions/new?edition=${editionId}&section=matchups&error=${encodeURIComponent(
+                "We could not identify the matchup to delete."
+            )}`
+        );
+    }
+
+    const { error: deleteError } = await supabase
+        .from("edition_matchups")
+        .delete()
+        .eq("id", matchupId)
+        .eq("edition_id", editionId);
+
+    if (deleteError) {
+        redirect(
+            `/offices/editions/new?edition=${editionId}&section=matchups&error=${encodeURIComponent(
+                deleteError.message
+            )}`
+        );
+    }
+
+    redirect(
+        `/offices/editions/new?edition=${editionId}&section=matchups&success=${encodeURIComponent(
+            "Matchup deleted"
+        )}`
+    );
+}
+
 export async function deleteStory(
     editionId: string,
     storySlug: string,
@@ -608,3 +653,4 @@ export async function deleteEdition(editionId: string) {
         `/offices/editions/new?success=${encodeURIComponent("Edition deleted")}`
     );
 }
+

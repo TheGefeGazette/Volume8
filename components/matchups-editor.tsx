@@ -1,7 +1,10 @@
 "use client";
 
 import { GazetteRichTextEditor } from "@/components/gazette-rich-text-editor";
-import { addMatchup } from "@/app/offices/editions/new/actions";
+import {
+    addMatchup,
+    deleteMatchup,
+} from "@/app/offices/editions/new/actions";
 
 type MatchupsEditorProps = {
     fieldName: string;
@@ -67,6 +70,29 @@ export function MatchupsEditor({
                         <div className="matchup-number">
                             Matchup {index + 1}
                         </div>
+
+                        {editionId && (
+                            <button
+                                type="submit"
+                                className="office-secondary"
+                                formAction={deleteMatchup.bind(
+                                    null,
+                                    editionId,
+                                    matchup.id
+                                )}
+                                onClick={(event) => {
+                                    const confirmed = window.confirm(
+                                        `Delete Matchup ${index + 1}?\n\nThis cannot be undone.`
+                                    );
+
+                                    if (!confirmed) {
+                                        event.preventDefault();
+                                    }
+                                }}
+                            >
+                                Delete Matchup
+                            </button>
+                        )}
 
                         <input
                             type="hidden"

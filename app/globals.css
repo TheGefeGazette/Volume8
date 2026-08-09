@@ -1588,3 +1588,97 @@ a {
     margin: 0 0 28px;
   }
 }
+
+/* ---------- Collapsed Matchup Stories ---------- */
+
+.structured-matchup-story {
+  margin: 0 0 28px;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
+.matchup-story-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 20px 0 16px;
+}
+
+.matchup-story-summary::-webkit-details-marker {
+  display: none;
+}
+
+.matchup-story-summary>h4 {
+  margin: 0 0 16px;
+  text-align: center;
+  font-size: 1.7rem;
+  line-height: 1.15;
+}
+
+.structured-scoreline {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 14px;
+  margin: 0 auto 12px;
+}
+
+.matchup-team {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.matchup-team-winner {
+  text-align: right;
+}
+
+.matchup-team-loser {
+  text-align: left;
+}
+
+.matchup-score {
+  min-width: 3ch;
+  text-align: center;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.matchup-score-dash {
+  font-weight: 700;
+}
+
+.structured-scoreline strong {
+  font-weight: 700;
+}
+
+
+.matchup-expand-label {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.matchup-expand-label::after {
+  content: " ▼";
+}
+
+.structured-matchup-story[open] .matchup-expand-label::after {
+  content: " ▲";
+}
+
+.structured-matchup-story[open] .matchup-expand-label {
+  margin-bottom: 18px;
+}
+
+.matchup-expanded-story {
+  padding: 0 0 24px;
+}
+
+.matchup-expanded-story .story-body {
+  max-width: 820px;
+  margin: 0 auto;
+}
