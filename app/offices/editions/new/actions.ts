@@ -667,6 +667,51 @@ export async function addPick(formData: FormData) {
     );
 }
 
+export async function deletePick(
+    editionId: string,
+    pickId: number,
+    formData: FormData
+) {
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        redirect("/offices/login");
+    }
+
+    if (!editionId || !pickId) {
+        redirect(
+            `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&error=${encodeURIComponent(
+                "We could not identify the pick to delete."
+            )}`
+        );
+    }
+
+    const { error: deleteError } = await supabase
+        .from("edition_picks")
+        .delete()
+        .eq("id", pickId)
+        .eq("edition_id", editionId);
+
+    if (deleteError) {
+        redirect(
+            `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&error=${encodeURIComponent(
+                deleteError.message
+            )}`
+        );
+    }
+
+    redirect(
+        `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&success=${encodeURIComponent(
+            "Pick deleted"
+        )}`
+    );
+}
+
 export async function deleteStory(
     editionId: string,
     storySlug: string,

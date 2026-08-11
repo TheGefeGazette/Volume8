@@ -1,6 +1,9 @@
 "use client";
 
-import { addPick } from "@/app/offices/editions/new/actions";
+import {
+    addPick,
+    deletePick,
+} from "@/app/offices/editions/new/actions";
 
 type PicksEditorProps = {
     editionId?: string;
@@ -47,6 +50,29 @@ export function PicksEditor({
                         <div className="matchup-number">
                             Pick {index + 1}
                         </div>
+
+                        {editionId && (
+                            <button
+                                type="submit"
+                                className="office-secondary"
+                                formAction={deletePick.bind(
+                                    null,
+                                    editionId,
+                                    pick.id
+                                )}
+                                onClick={(event) => {
+                                    const confirmed = window.confirm(
+                                        `Delete Pick ${index + 1}?\n\nThis cannot be undone.`
+                                    );
+
+                                    if (!confirmed) {
+                                        event.preventDefault();
+                                    }
+                                }}
+                            >
+                                Delete Pick
+                            </button>
+                        )}
 
                         <div className="pick-fields">
                             <label>
