@@ -260,6 +260,45 @@ export async function saveDraft(formData: FormData) {
         return null;
     }
 
+    async function saveBoneheadRecipient(targetEditionId: string) {
+        const recipientValue = formData.get("boneheadRecipient");
+
+        const recipient =
+            typeof recipientValue === "string"
+                ? recipientValue.trim()
+                : "";
+
+        const { data: existingBonehead, error: lookupError } = await supabase
+            .from("edition_boneheads")
+            .select("id")
+            .eq("edition_id", targetEditionId)
+            .maybeSingle();
+
+        if (lookupError) {
+            return lookupError;
+        }
+
+        if (existingBonehead) {
+            const { error: updateError } = await supabase
+                .from("edition_boneheads")
+                .update({
+                    recipient,
+                })
+                .eq("id", existingBonehead.id);
+
+            return updateError;
+        }
+
+        const { error: insertError } = await supabase
+            .from("edition_boneheads")
+            .insert({
+                edition_id: targetEditionId,
+                recipient,
+            });
+
+        return insertError;
+    }
+
     if (editionId) {
         const { error } = await supabase
             .from("editions")
@@ -325,6 +364,16 @@ export async function saveDraft(formData: FormData) {
             redirect(
                 `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&error=${encodeURIComponent(
                     picksSaveError.message
+                )}`
+            );
+        }
+
+        const boneheadSaveError = await saveBoneheadRecipient(editionId);
+
+        if (boneheadSaveError) {
+            redirect(
+                `/offices/editions/new?edition=${editionId}&section=bonehead-benching&error=${encodeURIComponent(
+                    boneheadSaveError.message
                 )}`
             );
         }

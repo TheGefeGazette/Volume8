@@ -3,7 +3,6 @@ import { SectionEditorTabs } from "@/components/section-editor-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { saveDraft } from "./actions";
 
-
 type NewEditionPageProps = {
   searchParams: Promise<{
     edition?: string;
@@ -41,6 +40,8 @@ export default async function NewEditionPage({
     underdog: string | null;
     sort_order: number | null;
   }[] = [];
+
+  let savedBoneheadRecipient = "";
 
   let savedEdition: {
     title: string;
@@ -105,6 +106,7 @@ export default async function NewEditionPage({
       .order("sort_order", { ascending: true });
 
     savedMatchups = matchupData ?? [];
+
     const { data: picksData } = await supabase
       .from("edition_picks")
       .select(
@@ -114,19 +116,34 @@ export default async function NewEditionPage({
       .order("sort_order", { ascending: true });
 
     savedPicks = picksData ?? [];
+
+    const { data: boneheadData } = await supabase
+      .from("edition_boneheads")
+      .select("recipient")
+      .eq("edition_id", editionId)
+      .maybeSingle();
+
+    savedBoneheadRecipient =
+      boneheadData?.recipient ?? "";
   }
+
   return (
     <form key={editionId ?? "new"} action={saveDraft}>
       <input type="hidden" name="editionId" value={editionId ?? ""} />
+
       <>
         <header className="office-header">
           <div>
             <p>Fresh Ink</p>
             <h1>New Edition</h1>
           </div>
+
           <div className="office-header-actions">
             {editionId && (
-              <Link className="office-secondary" href="/offices/editions/new">
+              <Link
+                className="office-secondary"
+                href="/offices/editions/new"
+              >
                 New Draft
               </Link>
             )}
@@ -158,7 +175,10 @@ export default async function NewEditionPage({
         </header>
 
         {success && (
-          <div className="editor-message editor-message-success" role="status">
+          <div
+            className="editor-message editor-message-success"
+            role="status"
+          >
             <strong>
               {success === "Edition published"
                 ? "Extra! Extra! The presses are rolling."
@@ -172,7 +192,10 @@ export default async function NewEditionPage({
         )}
 
         {error && (
-          <div className="editor-message editor-message-error" role="alert">
+          <div
+            className="editor-message editor-message-error"
+            role="alert"
+          >
             <strong>Newsroom problem</strong>
             <p>{error}</p>
           </div>
@@ -183,7 +206,9 @@ export default async function NewEditionPage({
             Edition title
             <input
               name="title"
-              defaultValue={savedEdition?.title ?? "Untitled Edition"}
+              defaultValue={
+                savedEdition?.title ?? "Untitled Edition"
+              }
             />
           </label>
 
@@ -206,23 +231,30 @@ export default async function NewEditionPage({
             customSections={customSections}
             savedMatchups={savedMatchups}
             savedPicks={savedPicks}
+            savedBoneheadRecipient={savedBoneheadRecipient}
           />
 
           <aside className="tool-drawer">
             <h2>Newsroom Tools</h2>
+
             <button type="button">
               AI Newsroom <small>Assistant only</small>
             </button>
+
             <button type="button">
               GIF Search <small>Coming later</small>
             </button>
+
             <button type="button">
               Image Studio <small>Coming later</small>
             </button>
 
             <div className="principle">
               <strong>Rule No. 1</strong>
-              <p>The AI is the newsroom assistant—not the editor-in-chief.</p>
+              <p>
+                The AI is the newsroom assistant—not the
+                editor-in-chief.
+              </p>
             </div>
           </aside>
         </div>

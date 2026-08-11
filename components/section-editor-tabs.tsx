@@ -38,6 +38,8 @@ type SectionEditorTabsProps = {
         underdog: string | null;
         sort_order: number | null;
     }[];
+
+    savedBoneheadRecipient: string;
 };
 
 export function SectionEditorTabs({
@@ -48,6 +50,7 @@ export function SectionEditorTabs({
     customSections = [],
     savedMatchups,
     savedPicks,
+    savedBoneheadRecipient,
 }: SectionEditorTabsProps) {
     const router = useRouter();
     const pathname = usePathname();
@@ -159,12 +162,16 @@ export function SectionEditorTabs({
                                     <button
                                         type="submit"
                                         className="office-secondary"
-                                        formAction={deleteStory.bind(null, editionId, section.slug)}
-
+                                        formAction={deleteStory.bind(
+                                            null,
+                                            editionId,
+                                            section.slug
+                                        )}
                                     >
                                         Delete Story
                                     </button>
                                 )}
+
                             {section.slug === "matchups" ? (
                                 <MatchupsEditor
                                     fieldName={section.fieldName}
@@ -177,6 +184,25 @@ export function SectionEditorTabs({
                                     editionId={editionId}
                                     picks={savedPicks}
                                 />
+                            ) : section.slug === "bonehead-benching" ? (
+                                <>
+                                    <div className="bonehead-recipient-field">
+                                        <label>
+                                            Recipient
+                                            <input
+                                                type="text"
+                                                name="boneheadRecipient"
+                                                defaultValue={savedBoneheadRecipient}
+                                                placeholder="This week's Bonehead"
+                                            />
+                                        </label>
+                                    </div>
+
+                                    <GazetteRichTextEditor
+                                        fieldName={section.fieldName}
+                                        initialContent={savedSectionBodies[section.slug] ?? ""}
+                                    />
+                                </>
                             ) : (
                                 <GazetteRichTextEditor
                                     fieldName={section.fieldName}
