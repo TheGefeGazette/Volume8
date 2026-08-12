@@ -105,6 +105,10 @@ export default async function OfficesPage() {
                   Edit
                 </Link>
 
+                <Link href={`/offices/editions/preview/${edition.id}`}>
+                  Preview
+                </Link>
+
                 <form action={copyEdition}>
                   <input
                     type="hidden"
@@ -145,6 +149,10 @@ export default async function OfficesPage() {
               <div className="edition-row-actions">
                 <Link href={`/editions/${edition.slug}`}>
                   View
+                </Link>
+
+                <Link href={`/offices/editions/new?edition=${edition.id}`}>
+                  Edit
                 </Link>
 
                 <DeleteEditionForm
