@@ -1,5 +1,7 @@
 "use client";
 
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { GazetteRichTextEditor } from "@/components/gazette-rich-text-editor";
 import {
     addMatchup,
@@ -28,8 +30,79 @@ export function MatchupsEditor({
     editionId,
     matchups,
 }: MatchupsEditorProps) {
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
+
+    function getCurrentForm(button: HTMLButtonElement) {
+        return button.form;
+    }
+
+    function handleAddMatchup(
+        event: React.MouseEvent<HTMLButtonElement>
+    ) {
+        event.preventDefault();
+
+        const form = getCurrentForm(event.currentTarget);
+
+        if (!form) {
+            return;
+        }
+
+        const formData = new FormData(form);
+
+        startTransition(async () => {
+            const result = await addMatchup(formData);
+
+            if (result?.error) {
+                window.alert(result.error);
+                return;
+            }
+
+            router.refresh();
+        });
+    }
+
+    function handleDeleteMatchup(
+        event: React.MouseEvent<HTMLButtonElement>,
+        matchupId: string,
+        matchupNumber: number
+    ) {
+        event.preventDefault();
+
+        const confirmed = window.confirm(
+            `Delete Matchup ${matchupNumber}?\n\nThis cannot be undone.`
+        );
+
+        if (!confirmed || !editionId) {
+            return;
+        }
+
+        const form = getCurrentForm(event.currentTarget);
+
+        if (!form) {
+            return;
+        }
+
+        const formData = new FormData(form);
+
+        startTransition(async () => {
+            const result = await deleteMatchup(
+                editionId,
+                matchupId,
+                formData
+            );
+
+            if (result?.error) {
+                window.alert(result.error);
+                return;
+            }
+
+            router.refresh();
+        });
+    }
+
     return (
-        <div className="matchups-editor">
+        <div id="matchups-editor" className="matchups-editor">
             <p className="matchup-prototype-note">
                 {matchups.length} structured matchup
                 {matchups.length === 1 ? "" : "s"} loaded
@@ -42,12 +115,12 @@ export function MatchupsEditor({
                 </div>
 
                 <button
-                    type="submit"
+                    type="button"
                     className="office-secondary"
-                    formAction={addMatchup}
-                    disabled={!editionId}
+                    onClick={handleAddMatchup}
+                    disabled={!editionId || isPending}
                 >
-                    + Add Matchup
+                    {isPending ? "Working..." : "+ Add Matchup"}
                 </button>
             </div>
 
@@ -73,22 +146,16 @@ export function MatchupsEditor({
 
                         {editionId && (
                             <button
-                                type="submit"
+                                type="button"
                                 className="office-secondary"
-                                formAction={deleteMatchup.bind(
-                                    null,
-                                    editionId,
-                                    matchup.id
-                                )}
-                                onClick={(event) => {
-                                    const confirmed = window.confirm(
-                                        `Delete Matchup ${index + 1}?\n\nThis cannot be undone.`
-                                    );
-
-                                    if (!confirmed) {
-                                        event.preventDefault();
-                                    }
-                                }}
+                                disabled={isPending}
+                                onClick={(event) =>
+                                    handleDeleteMatchup(
+                                        event,
+                                        matchup.id,
+                                        index + 1
+                                    )
+                                }
                             >
                                 Delete Matchup
                             </button>

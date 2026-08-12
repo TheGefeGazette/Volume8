@@ -541,7 +541,7 @@ export async function addMatchup(formData: FormData) {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-        redirect("/offices/login");
+        return { error: "You must be signed in." };
     }
 
     const editionIdValue = formData.get("editionId");
@@ -550,11 +550,78 @@ export async function addMatchup(formData: FormData) {
         typeof editionIdValue === "string" ? editionIdValue.trim() : "";
 
     if (!editionId) {
-        redirect(
-            `/offices/editions/new?error=${encodeURIComponent(
-                "Save the edition before adding a matchup."
-            )}`
+        return {
+            error: "Save the edition before adding a matchup.",
+        };
+    }
+
+    // Preserve everything already typed into existing matchups.
+    const matchupIdEntries = Array.from(formData.entries()).filter(
+        ([key]) => key.startsWith("matchupId:")
+    );
+
+    for (const [key] of matchupIdEntries) {
+        const matchupId = key.replace("matchupId:", "");
+
+        if (!matchupId) {
+            continue;
+        }
+
+        const winnerValue = formData.get(`matchupWinner:${matchupId}`);
+        const loserValue = formData.get(`matchupLoser:${matchupId}`);
+        const winnerScoreValue = formData.get(
+            `matchupWinnerScore:${matchupId}`
         );
+        const loserScoreValue = formData.get(
+            `matchupLoserScore:${matchupId}`
+        );
+        const headlineValue = formData.get(
+            `matchupHeadline:${matchupId}`
+        );
+        const bodyValue = formData.get(`matchupBody:${matchupId}`);
+
+        const winner =
+            typeof winnerValue === "string" ? winnerValue.trim() : "";
+
+        const loser =
+            typeof loserValue === "string" ? loserValue.trim() : "";
+
+        const winnerScore =
+            typeof winnerScoreValue === "string" &&
+                winnerScoreValue.trim() !== ""
+                ? Number(winnerScoreValue)
+                : null;
+
+        const loserScore =
+            typeof loserScoreValue === "string" &&
+                loserScoreValue.trim() !== ""
+                ? Number(loserScoreValue)
+                : null;
+
+        const headline =
+            typeof headlineValue === "string"
+                ? headlineValue.trim()
+                : "";
+
+        const bodyHtml =
+            typeof bodyValue === "string" ? bodyValue.trim() : "";
+
+        const { error: updateError } = await supabase
+            .from("edition_matchups")
+            .update({
+                winner,
+                loser,
+                winner_score: winnerScore,
+                loser_score: loserScore,
+                headline,
+                body_html: bodyHtml,
+            })
+            .eq("id", matchupId)
+            .eq("edition_id", editionId);
+
+        if (updateError) {
+            return { error: updateError.message };
+        }
     }
 
     const { data: existingMatchups, error: lookupError } = await supabase
@@ -565,11 +632,7 @@ export async function addMatchup(formData: FormData) {
         .limit(1);
 
     if (lookupError) {
-        redirect(
-            `/offices/editions/new?edition=${editionId}&section=matchups&error=${encodeURIComponent(
-                lookupError.message
-            )}`
-        );
+        return { error: lookupError.message };
     }
 
     const highestSortOrder =
@@ -589,18 +652,10 @@ export async function addMatchup(formData: FormData) {
         });
 
     if (insertError) {
-        redirect(
-            `/offices/editions/new?edition=${editionId}&section=matchups&error=${encodeURIComponent(
-                insertError.message
-            )}`
-        );
+        return { error: insertError.message };
     }
 
-    redirect(
-        `/offices/editions/new?edition=${editionId}&section=matchups&success=${encodeURIComponent(
-            "Matchup added"
-        )}`
-    );
+    return { success: true };
 }
 
 export async function deleteMatchup(
@@ -616,15 +671,91 @@ export async function deleteMatchup(
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-        redirect("/offices/login");
+        return { error: "You must be signed in." };
     }
 
     if (!editionId || !matchupId) {
-        redirect(
-            `/offices/editions/new?edition=${editionId}&section=matchups&error=${encodeURIComponent(
-                "We could not identify the matchup to delete."
-            )}`
+        return {
+            error: "We could not identify the matchup to delete.",
+        };
+    }
+
+    // Preserve edits in every OTHER matchup before deleting this one.
+    const matchupIdEntries = Array.from(formData.entries()).filter(
+        ([key]) => key.startsWith("matchupId:")
+    );
+
+    for (const [key] of matchupIdEntries) {
+        const currentMatchupId = key.replace("matchupId:", "");
+
+        if (
+            !currentMatchupId ||
+            currentMatchupId === matchupId
+        ) {
+            continue;
+        }
+
+        const winnerValue = formData.get(
+            `matchupWinner:${currentMatchupId}`
         );
+        const loserValue = formData.get(
+            `matchupLoser:${currentMatchupId}`
+        );
+        const winnerScoreValue = formData.get(
+            `matchupWinnerScore:${currentMatchupId}`
+        );
+        const loserScoreValue = formData.get(
+            `matchupLoserScore:${currentMatchupId}`
+        );
+        const headlineValue = formData.get(
+            `matchupHeadline:${currentMatchupId}`
+        );
+        const bodyValue = formData.get(
+            `matchupBody:${currentMatchupId}`
+        );
+
+        const winner =
+            typeof winnerValue === "string" ? winnerValue.trim() : "";
+
+        const loser =
+            typeof loserValue === "string" ? loserValue.trim() : "";
+
+        const winnerScore =
+            typeof winnerScoreValue === "string" &&
+                winnerScoreValue.trim() !== ""
+                ? Number(winnerScoreValue)
+                : null;
+
+        const loserScore =
+            typeof loserScoreValue === "string" &&
+                loserScoreValue.trim() !== ""
+                ? Number(loserScoreValue)
+                : null;
+
+        const headline =
+            typeof headlineValue === "string"
+                ? headlineValue.trim()
+                : "";
+
+        const bodyHtml =
+            typeof bodyValue === "string" ? bodyValue.trim() : "";
+
+        const { error: updateError } = await supabase
+            .from("edition_matchups")
+            .update({
+                winner,
+                loser,
+                winner_score: winnerScore,
+                loser_score: loserScore,
+                headline,
+                body_html: bodyHtml,
+            })
+            .eq("id", currentMatchupId)
+            .eq("edition_id", editionId);
+
+        if (updateError) {
+            return { error: updateError.message };
+        }
     }
 
     const { error: deleteError } = await supabase
@@ -634,18 +765,10 @@ export async function deleteMatchup(
         .eq("edition_id", editionId);
 
     if (deleteError) {
-        redirect(
-            `/offices/editions/new?edition=${editionId}&section=matchups&error=${encodeURIComponent(
-                deleteError.message
-            )}`
-        );
+        return { error: deleteError.message };
     }
 
-    redirect(
-        `/offices/editions/new?edition=${editionId}&section=matchups&success=${encodeURIComponent(
-            "Matchup deleted"
-        )}`
-    );
+    return { success: true };
 }
 
 export async function addPick(formData: FormData) {
@@ -657,7 +780,7 @@ export async function addPick(formData: FormData) {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-        redirect("/offices/login");
+        return { error: "You must be signed in." };
     }
 
     const editionIdValue = formData.get("editionId");
@@ -666,11 +789,55 @@ export async function addPick(formData: FormData) {
         typeof editionIdValue === "string" ? editionIdValue.trim() : "";
 
     if (!editionId) {
-        redirect(
-            `/offices/editions/new?error=${encodeURIComponent(
-                "Save the edition before adding a pick."
-            )}`
-        );
+        return {
+            error: "Save the edition before adding a pick.",
+        };
+    }
+
+    // Preserve everything already typed into existing picks.
+    const favoriteEntries = Array.from(formData.entries()).filter(
+        ([key]) => key.startsWith("pickFavorite:")
+    );
+
+    for (const [key] of favoriteEntries) {
+        const pickId = key.replace("pickFavorite:", "");
+
+        if (!pickId) {
+            continue;
+        }
+
+        const favoriteValue = formData.get(`pickFavorite:${pickId}`);
+        const jokeValue = formData.get(`pickJoke:${pickId}`);
+        const underdogValue = formData.get(`pickUnderdog:${pickId}`);
+
+        const favorite =
+            typeof favoriteValue === "string"
+                ? favoriteValue.trim()
+                : "";
+
+        const jokeText =
+            typeof jokeValue === "string"
+                ? jokeValue.trim()
+                : "";
+
+        const underdog =
+            typeof underdogValue === "string"
+                ? underdogValue.trim()
+                : "";
+
+        const { error: updateError } = await supabase
+            .from("edition_picks")
+            .update({
+                favorite,
+                joke_text: jokeText,
+                underdog,
+            })
+            .eq("id", pickId)
+            .eq("edition_id", editionId);
+
+        if (updateError) {
+            return { error: updateError.message };
+        }
     }
 
     const { data: existingPicks, error: lookupError } = await supabase
@@ -681,11 +848,7 @@ export async function addPick(formData: FormData) {
         .limit(1);
 
     if (lookupError) {
-        redirect(
-            `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&error=${encodeURIComponent(
-                lookupError.message
-            )}`
-        );
+        return { error: lookupError.message };
     }
 
     const highestSortOrder =
@@ -702,18 +865,10 @@ export async function addPick(formData: FormData) {
         });
 
     if (insertError) {
-        redirect(
-            `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&error=${encodeURIComponent(
-                insertError.message
-            )}`
-        );
+        return { error: insertError.message };
     }
 
-    redirect(
-        `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&success=${encodeURIComponent(
-            "Pick added"
-        )}`
-    );
+    return { success: true };
 }
 
 export async function deletePick(
@@ -729,15 +884,68 @@ export async function deletePick(
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-        redirect("/offices/login");
+        return { error: "You must be signed in." };
     }
 
     if (!editionId || !pickId) {
-        redirect(
-            `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&error=${encodeURIComponent(
-                "We could not identify the pick to delete."
-            )}`
+        return {
+            error: "We could not identify the pick to delete.",
+        };
+    }
+
+    // Preserve edits in every OTHER pick before deleting this one.
+    const favoriteEntries = Array.from(formData.entries()).filter(
+        ([key]) => key.startsWith("pickFavorite:")
+    );
+
+    for (const [key] of favoriteEntries) {
+        const currentPickId = key.replace("pickFavorite:", "");
+
+        if (
+            !currentPickId ||
+            Number(currentPickId) === pickId
+        ) {
+            continue;
+        }
+
+        const favoriteValue = formData.get(
+            `pickFavorite:${currentPickId}`
         );
+        const jokeValue = formData.get(
+            `pickJoke:${currentPickId}`
+        );
+        const underdogValue = formData.get(
+            `pickUnderdog:${currentPickId}`
+        );
+
+        const favorite =
+            typeof favoriteValue === "string"
+                ? favoriteValue.trim()
+                : "";
+
+        const jokeText =
+            typeof jokeValue === "string"
+                ? jokeValue.trim()
+                : "";
+
+        const underdog =
+            typeof underdogValue === "string"
+                ? underdogValue.trim()
+                : "";
+
+        const { error: updateError } = await supabase
+            .from("edition_picks")
+            .update({
+                favorite,
+                joke_text: jokeText,
+                underdog,
+            })
+            .eq("id", Number(currentPickId))
+            .eq("edition_id", editionId);
+
+        if (updateError) {
+            return { error: updateError.message };
+        }
     }
 
     const { error: deleteError } = await supabase
@@ -747,18 +955,10 @@ export async function deletePick(
         .eq("edition_id", editionId);
 
     if (deleteError) {
-        redirect(
-            `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&error=${encodeURIComponent(
-                deleteError.message
-            )}`
-        );
+        return { error: deleteError.message };
     }
 
-    redirect(
-        `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&success=${encodeURIComponent(
-            "Pick deleted"
-        )}`
-    );
+    return { success: true };
 }
 
 export async function deleteStory(

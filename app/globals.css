@@ -437,6 +437,19 @@ a {
   line-height: 1.15;
 }
 
+.matchups-editor-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 12px 0;
+  background: var(--paper);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
 .scoreline {
   display: grid;
   grid-template-columns: 1fr auto auto auto 1fr;

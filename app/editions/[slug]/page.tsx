@@ -50,6 +50,16 @@ export default async function EditionPage({
     .select("recipient")
     .eq("edition_id", edition.id)
     .maybeSingle();
+  const orderedSections = sections
+    ? [
+      ...sections.filter(
+        (section) => section.slug !== "next-weeks-picks"
+      ),
+      ...sections.filter(
+        (section) => section.slug === "next-weeks-picks"
+      ),
+    ]
+    : [];
 
   return (
     <main className="edition-page published-edition-page">
@@ -75,7 +85,7 @@ export default async function EditionPage({
             </section>
           )}
 
-          {!sectionsError && sections?.length === 0 && (
+          {!sectionsError && orderedSections.length === 0 && (
             <section className="story-section">
               <h3>No Articles Found</h3>
               <p>
@@ -85,7 +95,7 @@ export default async function EditionPage({
             </section>
           )}
 
-          {!sectionsError && sections && sections.length > 0 && (
+          {!sectionsError && orderedSections.length > 0 && (
             <>
               <div className="preview-opening-layout">
                 <section className="story-section preview-welcome-story">
@@ -114,24 +124,24 @@ export default async function EditionPage({
                     className="story-body"
                     dangerouslySetInnerHTML={{
                       __html:
-                        sections[0].body_html ||
+                        orderedSections[0].body_html ||
                         "<p>This section remains unwritten.</p>",
                     }}
                   />
 
-                  {sections[0].gif_url &&
+                  {orderedSections[0].gif_url &&
                     !(sections[0].body_html || "").includes("<img") && (
                       <img
                         className="story-gif"
-                        src={sections[0].gif_url}
-                        alt={`${sections[0].title} GIF`}
+                        src={orderedSections[0].gif_url}
+                        alt={`${orderedSections[0].title} GIF`}
                       />
                     )}
                 </section>
               </div>
 
               <div className="preview-full-width-stories">
-                {sections.slice(1).map((section) => {
+                {orderedSections.slice(1).map((section) => {
                   const bodyHtml =
                     section.body_html ||
                     "<p>This section remains unwritten.</p>";

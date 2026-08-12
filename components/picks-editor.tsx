@@ -1,5 +1,7 @@
 "use client";
 
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
     addPick,
     deletePick,
@@ -20,6 +22,77 @@ export function PicksEditor({
     editionId,
     picks,
 }: PicksEditorProps) {
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
+
+    function getCurrentForm(button: HTMLButtonElement) {
+        return button.form;
+    }
+
+    function handleAddPick(
+        event: React.MouseEvent<HTMLButtonElement>
+    ) {
+        event.preventDefault();
+
+        const form = getCurrentForm(event.currentTarget);
+
+        if (!form) {
+            return;
+        }
+
+        const formData = new FormData(form);
+
+        startTransition(async () => {
+            const result = await addPick(formData);
+
+            if (result?.error) {
+                window.alert(result.error);
+                return;
+            }
+
+            router.refresh();
+        });
+    }
+
+    function handleDeletePick(
+        event: React.MouseEvent<HTMLButtonElement>,
+        pickId: number,
+        pickNumber: number
+    ) {
+        event.preventDefault();
+
+        const confirmed = window.confirm(
+            `Delete Pick ${pickNumber}?\n\nThis cannot be undone.`
+        );
+
+        if (!confirmed || !editionId) {
+            return;
+        }
+
+        const form = getCurrentForm(event.currentTarget);
+
+        if (!form) {
+            return;
+        }
+
+        const formData = new FormData(form);
+
+        startTransition(async () => {
+            const result = await deletePick(
+                editionId,
+                pickId,
+                formData
+            );
+
+            if (result?.error) {
+                window.alert(result.error);
+                return;
+            }
+
+            router.refresh();
+        });
+    }
+
     return (
         <div className="picks-editor">
             <div className="picks-editor-header">
@@ -29,12 +102,12 @@ export function PicksEditor({
                 </div>
 
                 <button
-                    type="submit"
+                    type="button"
                     className="office-secondary"
-                    formAction={addPick}
-                    disabled={!editionId}
+                    onClick={handleAddPick}
+                    disabled={!editionId || isPending}
                 >
-                    + Add Pick
+                    {isPending ? "Working..." : "+ Add Pick"}
                 </button>
             </div>
 
@@ -53,22 +126,16 @@ export function PicksEditor({
 
                         {editionId && (
                             <button
-                                type="submit"
+                                type="button"
                                 className="office-secondary"
-                                formAction={deletePick.bind(
-                                    null,
-                                    editionId,
-                                    pick.id
-                                )}
-                                onClick={(event) => {
-                                    const confirmed = window.confirm(
-                                        `Delete Pick ${index + 1}?\n\nThis cannot be undone.`
-                                    );
-
-                                    if (!confirmed) {
-                                        event.preventDefault();
-                                    }
-                                }}
+                                disabled={isPending}
+                                onClick={(event) =>
+                                    handleDeletePick(
+                                        event,
+                                        pick.id,
+                                        index + 1
+                                    )
+                                }
                             >
                                 Delete Pick
                             </button>
