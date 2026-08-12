@@ -7,7 +7,6 @@ import {
 } from "@/app/offices/editions/new/actions";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { GazetteRichTextEditor } from "@/components/gazette-rich-text-editor";
-import { GifPicker } from "@/components/gif-picker";
 import { editionSections } from "@/lib/gazette/edition-sections";
 import { PicksEditor } from "@/components/picks-editor";
 
@@ -210,9 +209,11 @@ export function SectionEditorTabs({
                                 />
                             )}
 
-                            <GifPicker
-                                fieldName={`gifUrl:${section.slug}`}
-                                initialUrl={savedSectionGifUrls[section.slug] ?? ""}
+                            <input
+                                type="hidden"
+                                name={`gifUrl:${section.slug}`}
+                                value={savedSectionGifUrls[section.slug] ?? ""}
+                                readOnly
                             />
                         </div>
                     </div>

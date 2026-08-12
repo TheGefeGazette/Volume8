@@ -53,6 +53,12 @@ export default async function PreviewEditionPage({
         .eq("edition_id", edition.id)
         .order("sort_order", { ascending: true });
 
+    const { data: bonehead, error: boneheadError } = await supabase
+        .from("edition_boneheads")
+        .select("recipient")
+        .eq("edition_id", edition.id)
+        .maybeSingle();
+
     return (
         <main className="edition-page preview-edition-page">
             <div className="preview-banner">
@@ -205,6 +211,36 @@ export default async function PreviewEditionPage({
                                                             </p>
                                                         ))}
                                                 </div>
+                                            ) : section.slug === "bonehead-benching" ? (
+                                                <>
+                                                    {boneheadError && (
+                                                        <p>
+                                                            We were unable to retrieve this week&apos;s Bonehead recipient.
+                                                        </p>
+                                                    )}
+
+                                                    <div
+                                                        className="story-body"
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: bodyHtml,
+                                                        }}
+                                                    />
+
+                                                    {!boneheadError && bonehead?.recipient && (
+                                                        <div className="bonehead-award-ending">
+                                                            <p className="bonehead-award-closing">
+                                                                So give it up, Gefes, for this week&apos;s winner —{" "}
+                                                                <strong>{bonehead.recipient}</strong>!{" "}Here&apos;s your trophy, Bonehead. You earned it.
+                                                            </p>
+
+                                                            <img
+                                                                className="bonehead-static-trophy"
+                                                                src="/bbw-trophy.jpg"
+                                                                alt="Bonehead Benching of the Week trophy"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </>
                                             ) : (
                                                 <>
                                                     <div
