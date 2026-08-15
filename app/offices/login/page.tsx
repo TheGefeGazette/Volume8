@@ -1,4 +1,4 @@
-import { login } from "./actions";
+import { login, sendPasswordReset } from "./actions";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -44,6 +44,14 @@ export default async function LoginPage({
         {error ? <p role="alert">{error}</p> : null}
 
         <button type="submit">Open the Offices</button>
+        
+        <button
+          type="submit"
+          formAction={sendPasswordReset}
+          className="office-secondary"
+        >
+          Forgot Password
+        </button>
       </form>
 
       <small>Private editorial access only.</small>
