@@ -6,10 +6,15 @@ import { createClient } from "@/lib/supabase/server";
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
-  const email = formData.get("email");
-  const password = formData.get("password");
+  const emailValue = formData.get("email");
+  const passwordValue = formData.get("password");
 
-  if (typeof email !== "string" || typeof password !== "string") {
+  const email =
+    typeof emailValue === "string" ? emailValue.trim() : "";
+
+  const password =
+    typeof passwordValue === "string" ? passwordValue : "";
+  if (!email || !password) {
     redirect("/offices/login?error=Please enter an email and password.");
   }
 
