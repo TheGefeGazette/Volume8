@@ -37,7 +37,6 @@ export default async function LoginPage({
             type="password"
             name="password"
             placeholder="••••••••••••"
-            required
           />
         </label>
 
