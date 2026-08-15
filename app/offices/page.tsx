@@ -27,9 +27,18 @@ export default async function OfficesPage() {
           <p>Editorial Command Center</p>
           <h1>The Gazette Offices</h1>
         </div>
-        <Link className="office-primary" href="/offices/editions/new">
-          New Edition
-        </Link>
+        <div className="office-header-actions">
+          <a
+            className="office-secondary"
+            href="/api/yahoo/connect"
+          >
+            Connect Yahoo
+          </a>
+
+          <Link className="office-primary" href="/offices/editions/new">
+            New Edition
+          </Link>
+        </div>
       </header>
 
       <section className="status-grid">

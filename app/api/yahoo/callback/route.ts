@@ -5,6 +5,22 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export async function GET(request: NextRequest) {
     const code = request.nextUrl.searchParams.get("code");
     const error = request.nextUrl.searchParams.get("error");
+    const returnedState = request.nextUrl.searchParams.get("state");
+    const storedState = request.cookies.get("yahoo_oauth_state")?.value;
+
+    if (
+        !returnedState ||
+        !storedState ||
+        returnedState !== storedState
+    ) {
+        return NextResponse.json(
+            {
+                success: false,
+                error: "Yahoo authorization state check failed.",
+            },
+            { status: 400 }
+        );
+    }
 
     if (error) {
         return NextResponse.json(
@@ -184,8 +200,18 @@ export async function GET(request: NextRequest) {
         }
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
         success: true,
         message: "The Gefe Gazette successfully connected to Yahoo.",
     });
+
+    response.cookies.set("yahoo_oauth_state", "", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        maxAge: 0,
+        path: "/",
+    });
+
+    return response;
 }
