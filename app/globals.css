@@ -1766,3 +1766,18 @@ a {
   height: auto;
   margin: 0;
 }
+
+.status-card-link {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+
+.status-card-link article {
+  height: 100%;
+  cursor: pointer;
+}
+
+.status-card-link article:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+}

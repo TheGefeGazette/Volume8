@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SectionEditorTabs } from "@/components/section-editor-tabs";
+import { EditionEditorShell } from "@/components/edition-editor-shell";
 import { createClient } from "@/lib/supabase/server";
 import { saveDraft } from "./actions";
 
@@ -46,6 +46,7 @@ export default async function NewEditionPage({
   let savedEdition: {
     title: string;
     subtitle: string | null;
+    edition_type: string;
   } | null = null;
 
   let savedSectionBodies: Record<string, string> = {};
@@ -63,7 +64,7 @@ export default async function NewEditionPage({
 
     const { data } = await supabase
       .from("editions")
-      .select("title, subtitle")
+      .select("title, subtitle, edition_type")
       .eq("id", editionId)
       .single();
 
@@ -222,43 +223,21 @@ export default async function NewEditionPage({
           </label>
         </section>
 
-        <div className="editor-shell">
-          <SectionEditorTabs
-            savedSectionBodies={savedSectionBodies}
-            savedSectionGifUrls={savedSectionGifUrls}
-            initialActiveSlug={activeSection}
-            editionId={editionId}
-            customSections={customSections}
-            savedMatchups={savedMatchups}
-            savedPicks={savedPicks}
-            savedBoneheadRecipient={savedBoneheadRecipient}
-          />
 
-          <aside className="tool-drawer">
-            <h2>Newsroom Tools</h2>
+        <EditionEditorShell
+          initialEditionType={savedEdition?.edition_type ?? "regular_season"}
+          savedSectionBodies={savedSectionBodies}
+          savedSectionGifUrls={savedSectionGifUrls}
+          initialActiveSlug={activeSection}
+          editionId={editionId}
+          customSections={customSections}
+          savedMatchups={savedMatchups}
+          savedPicks={savedPicks}
+          savedBoneheadRecipient={savedBoneheadRecipient}
+        />
 
-            <button type="button">
-              AI Newsroom <small>Assistant only</small>
-            </button>
-
-            <button type="button">
-              GIF Search <small>Coming later</small>
-            </button>
-
-            <button type="button">
-              Image Studio <small>Coming later</small>
-            </button>
-
-            <div className="principle">
-              <strong>Rule No. 1</strong>
-              <p>
-                The AI is the newsroom assistant—not the
-                editor-in-chief.
-              </p>
-            </div>
-          </aside>
-        </div>
+        
       </>
-    </form>
+    </form >
   );
 }

@@ -42,29 +42,55 @@ export default async function OfficesPage() {
       </header>
 
       <section className="status-grid">
-        <article>
-          <span>Current Draft</span>
-          <strong>{currentDraft?.title ?? "No Active Draft"}</strong>
-          <p>
-            {currentDraft?.updated_at
-              ? `Last updated ${new Date(
-                currentDraft.updated_at
-              ).toLocaleDateString()}`
-              : "The newsroom is waiting for fresh copy"}
-          </p>
-        </article>
+        {currentDraft ? (
+          <Link
+            href={`/offices/editions/new?edition=${currentDraft.id}`}
+            className="status-card-link"
+          >
+            <article>
+              <span>Current Draft</span>
+              <strong>{currentDraft.title}</strong>
+              <p>
+                {currentDraft.updated_at
+                  ? `Last updated ${new Date(
+                    currentDraft.updated_at
+                  ).toLocaleDateString()}`
+                  : "The newsroom is waiting for fresh copy"}
+              </p>
+            </article>
+          </Link>
+        ) : (
+          <article>
+            <span>Current Draft</span>
+            <strong>No Active Draft</strong>
+            <p>The newsroom is waiting for fresh copy</p>
+          </article>
+        )}
 
-        <article>
-          <span>Latest Edition</span>
-          <strong>{latestPublished?.title ?? "Nothing Published Yet"}</strong>
-          <p>
-            {latestPublished?.updated_at
-              ? `Published edition updated ${new Date(
-                latestPublished.updated_at
-              ).toLocaleDateString()}`
-              : "The presses remain suspiciously quiet"}
-          </p>
-        </article>
+        {latestPublished ? (
+          <Link
+            href={`/editions/${latestPublished.slug}`}
+            className="status-card-link"
+          >
+            <article>
+              <span>Latest Edition</span>
+              <strong>{latestPublished.title}</strong>
+              <p>
+                {latestPublished.updated_at
+                  ? `Published edition updated ${new Date(
+                    latestPublished.updated_at
+                  ).toLocaleDateString()}`
+                  : "The presses remain suspiciously quiet"}
+              </p>
+            </article>
+          </Link>
+        ) : (
+          <article>
+            <span>Latest Edition</span>
+            <strong>Nothing Published Yet</strong>
+            <p>The presses remain suspiciously quiet</p>
+          </article>
+        )}
 
         <article>
           <span>Newsroom Status</span>

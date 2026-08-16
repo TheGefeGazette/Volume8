@@ -7,14 +7,19 @@ import {
 } from "@/app/offices/editions/new/actions";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { GazetteRichTextEditor } from "@/components/gazette-rich-text-editor";
-import { editionSections } from "@/lib/gazette/edition-sections";
+import {
+    editionSections,
+    draftGradesSections,
+} from "@/lib/gazette/edition-sections";
 import { PicksEditor } from "@/components/picks-editor";
+import { DraftGradesEditor } from "@/components/draft-grades-editor";
 
 type SectionEditorTabsProps = {
     savedSectionBodies: Record<string, string>;
     savedSectionGifUrls: Record<string, string>;
     initialActiveSlug?: string;
     editionId?: string;
+    editionType: string;
     customSections: {
         title: string;
         slug: string;
@@ -46,6 +51,7 @@ export function SectionEditorTabs({
     savedSectionGifUrls,
     initialActiveSlug,
     editionId,
+    editionType,
     customSections = [],
     savedMatchups,
     savedPicks,
@@ -55,11 +61,21 @@ export function SectionEditorTabs({
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const regularSections = editionSections.filter(
+    const isDraftGradesEdition =
+        editionType === "draft_grades";
+
+    const baseSections =
+        editionType === "draft_grades"
+            ? draftGradesSections
+            : editionSections;
+
+
+
+    const regularSections = baseSections.filter(
         (section) => section.slug !== "next-weeks-picks"
     );
 
-    const nextWeeksPicksSection = editionSections.find(
+    const nextWeeksPicksSection = baseSections.find(
         (section) => section.slug === "next-weeks-picks"
     );
 
@@ -100,6 +116,15 @@ export function SectionEditorTabs({
         router.replace(`${pathname}?${params.toString()}`, {
             scroll: false,
         });
+    }
+
+    if (isDraftGradesEdition) {
+        return (
+            <DraftGradesEditor
+                editionId={editionId}
+                savedSectionBodies={savedSectionBodies}
+            />
+        );
     }
 
     return (

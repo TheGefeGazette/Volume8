@@ -1,6 +1,9 @@
 "use server";
 
-import { editionSections } from "@/lib/gazette/edition-sections";
+import {
+    editionSections,
+    draftGradesSections,
+} from "@/lib/gazette/edition-sections";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,6 +23,7 @@ export async function saveDraft(formData: FormData) {
     const editionIdValue = formData.get("editionId");
     const titleValue = formData.get("title");
     const subtitleValue = formData.get("subtitle");
+    const editionTypeValue = formData.get("editionType");
     const activeSection =
         typeof activeSectionValue === "string" && activeSectionValue.trim()
             ? activeSectionValue.trim()
@@ -39,10 +43,20 @@ export async function saveDraft(formData: FormData) {
     const subtitle =
         typeof subtitleValue === "string" ? subtitleValue.trim() : "";
 
+    const editionType =
+        typeof editionTypeValue === "string" && editionTypeValue.trim()
+            ? editionTypeValue.trim()
+            : "regular_season";
+
+    const sectionsForEdition =
+        editionType === "draft_grades"
+            ? draftGradesSections
+            : editionSections;
+
     const sectionBodies: Record<string, string> = {};
     const sectionGifUrls: Record<string, string> = {};
 
-    for (const section of editionSections) {
+    for (const section of sectionsForEdition) {
         const bodyValue = formData.get(section.fieldName);
         const gifValue = formData.get(`gifUrl:${section.slug}`);
 
@@ -305,6 +319,7 @@ export async function saveDraft(formData: FormData) {
             .update({
                 title,
                 subtitle,
+                edition_type: editionType,
                 status: isPublishing ? "published" : "draft",
             })
             .eq("id", editionId);
@@ -317,7 +332,7 @@ export async function saveDraft(formData: FormData) {
             );
         }
 
-        for (const section of editionSections) {
+        for (const section of sectionsForEdition) {
             const sectionSaveError = await saveSection(
                 editionId,
                 section.slug,
@@ -401,6 +416,7 @@ export async function saveDraft(formData: FormData) {
         .insert({
             title,
             subtitle,
+            edition_type: editionType,
             slug,
             status: isPublishing ? "published" : "draft",
         })
@@ -413,7 +429,7 @@ export async function saveDraft(formData: FormData) {
         );
     }
 
-    for (const section of editionSections) {
+    for (const section of sectionsForEdition) {
         const sectionSaveError = await saveSection(
             data.id,
             section.slug,
