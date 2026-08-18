@@ -42,6 +42,13 @@ type SectionEditorTabsProps = {
         underdog: string | null;
         sort_order: number | null;
     }[];
+    savedManagerGrades: {
+        id: number;
+        manager_name: string | null;
+        team_name: string | null;
+        body_html: string | null;
+        sort_order: number | null;
+    }[];
 
     savedBoneheadRecipient: string;
 };
@@ -55,6 +62,7 @@ export function SectionEditorTabs({
     customSections = [],
     savedMatchups,
     savedPicks,
+    savedManagerGrades,
     savedBoneheadRecipient,
 }: SectionEditorTabsProps) {
     const router = useRouter();
@@ -122,7 +130,9 @@ export function SectionEditorTabs({
         return (
             <DraftGradesEditor
                 editionId={editionId}
+                initialActiveSlug={initialActiveSlug}
                 savedSectionBodies={savedSectionBodies}
+                savedManagerGrades={savedManagerGrades}
             />
         );
     }

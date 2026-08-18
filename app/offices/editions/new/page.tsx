@@ -41,6 +41,14 @@ export default async function NewEditionPage({
     sort_order: number | null;
   }[] = [];
 
+  let savedManagerGrades: {
+    id: number;
+    manager_name: string | null;
+    team_name: string | null;
+    body_html: string | null;
+    sort_order: number | null;
+  }[] = [];
+
   let savedBoneheadRecipient = "";
 
   let savedEdition: {
@@ -117,6 +125,16 @@ export default async function NewEditionPage({
       .order("sort_order", { ascending: true });
 
     savedPicks = picksData ?? [];
+
+    const { data: managerGradesData } = await supabase
+      .from("edition_manager_grades")
+      .select(
+        "id, manager_name, team_name, body_html, sort_order"
+      )
+      .eq("edition_id", editionId)
+      .order("sort_order", { ascending: true });
+
+    savedManagerGrades = managerGradesData ?? [];
 
     const { data: boneheadData } = await supabase
       .from("edition_boneheads")
@@ -233,10 +251,11 @@ export default async function NewEditionPage({
           customSections={customSections}
           savedMatchups={savedMatchups}
           savedPicks={savedPicks}
+          savedManagerGrades={savedManagerGrades}
           savedBoneheadRecipient={savedBoneheadRecipient}
         />
 
-        
+
       </>
     </form >
   );

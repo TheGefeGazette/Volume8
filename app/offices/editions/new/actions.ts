@@ -6,6 +6,7 @@ import {
 } from "@/lib/gazette/edition-sections";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 
 export async function saveDraft(formData: FormData) {
     const supabase = await createClient();
@@ -274,6 +275,63 @@ export async function saveDraft(formData: FormData) {
         return null;
     }
 
+    async function saveManagerGrades(targetEditionId: string) {
+        const managerGradeIdEntries = Array.from(formData.entries()).filter(
+            ([key]) => key.startsWith("managerGradeId:")
+        );
+
+        for (const [key, value] of managerGradeIdEntries) {
+            const managerGradeId = key.replace("managerGradeId:", "");
+
+            if (!managerGradeId || typeof value !== "string") {
+                continue;
+            }
+
+            const managerValue = formData.get(
+                `managerGradeManager:${managerGradeId}`
+            );
+
+            const teamValue = formData.get(
+                `managerGradeTeam:${managerGradeId}`
+            );
+
+            const bodyValue = formData.get(
+                `managerGradeBody:${managerGradeId}`
+            );
+
+            const managerName =
+                typeof managerValue === "string"
+                    ? managerValue.trim()
+                    : "";
+
+            const teamName =
+                typeof teamValue === "string"
+                    ? teamValue.trim()
+                    : "";
+
+            const bodyHtml =
+                typeof bodyValue === "string"
+                    ? bodyValue.trim()
+                    : "";
+
+            const { error: updateError } = await supabase
+                .from("edition_manager_grades")
+                .update({
+                    manager_name: managerName,
+                    team_name: teamName,
+                    body_html: bodyHtml,
+                })
+                .eq("id", Number(managerGradeId))
+                .eq("edition_id", targetEditionId);
+
+            if (updateError) {
+                return updateError;
+            }
+        }
+
+        return null;
+    }
+
     async function saveBoneheadRecipient(targetEditionId: string) {
         const recipientValue = formData.get("boneheadRecipient");
 
@@ -379,6 +437,16 @@ export async function saveDraft(formData: FormData) {
             redirect(
                 `/offices/editions/new?edition=${editionId}&section=next-weeks-picks&error=${encodeURIComponent(
                     picksSaveError.message
+                )}`
+            );
+        }
+
+        const managerGradesSaveError = await saveManagerGrades(editionId);
+
+        if (managerGradesSaveError) {
+            redirect(
+                `/offices/editions/new?edition=${editionId}&section=manager-grades&error=${encodeURIComponent(
+                    managerGradesSaveError.message
                 )}`
             );
         }
@@ -546,6 +614,57 @@ export async function addStory(formData: FormData) {
             storySlug
         )}&success=${encodeURIComponent("Story added")}`
     );
+}
+
+export async function addManagerGrade(formData: FormData) {
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        return;
+    }
+
+    const editionIdValue = formData.get("editionId");
+
+    const editionId =
+        typeof editionIdValue === "string"
+            ? editionIdValue.trim()
+            : "";
+
+    if (!editionId) {
+        return;
+    }
+
+    const { data: existingManagerGrades } = await supabase
+        .from("edition_manager_grades")
+        .select("sort_order")
+        .eq("edition_id", editionId)
+        .order("sort_order", { ascending: false })
+        .limit(1);
+
+    const highestSortOrder =
+        existingManagerGrades?.[0]?.sort_order ?? -1;
+
+    const { error } = await supabase
+        .from("edition_manager_grades")
+        .insert({
+            edition_id: editionId,
+            manager_name: "",
+            team_name: "",
+            body_html: "",
+            sort_order: highestSortOrder + 1,
+        });
+
+    if (error) {
+        console.error("Unable to add manager grade:", error);
+        return;
+    }
+
+    revalidatePath("/offices/editions/new");
 }
 
 export async function addMatchup(formData: FormData) {

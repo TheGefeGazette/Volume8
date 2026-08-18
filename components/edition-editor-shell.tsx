@@ -32,6 +32,13 @@ type EditionEditorShellProps = {
         underdog: string | null;
         sort_order: number | null;
     }[];
+    savedManagerGrades: {
+        id: number;
+        manager_name: string | null;
+        team_name: string | null;
+        body_html: string | null;
+        sort_order: number | null;
+    }[];
     savedBoneheadRecipient: string;
 };
 
@@ -44,6 +51,7 @@ export function EditionEditorShell({
     customSections,
     savedMatchups,
     savedPicks,
+    savedManagerGrades,
     savedBoneheadRecipient,
 }: EditionEditorShellProps) {
     const [editionType, setEditionType] = useState(initialEditionType);
@@ -70,6 +78,7 @@ export function EditionEditorShell({
                     customSections={customSections}
                     savedMatchups={savedMatchups}
                     savedPicks={savedPicks}
+                    savedManagerGrades={savedManagerGrades}
                     savedBoneheadRecipient={savedBoneheadRecipient}
                 />
 
