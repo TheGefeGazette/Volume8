@@ -630,7 +630,9 @@ export async function saveDraft(formData: FormData) {
         }
 
         redirect(
-            `/offices/editions/new?edition=${editionId}&section=${encodeURIComponent(
+            `/offices/editions/new?edition=${editionId}&editionType=${encodeURIComponent(
+                editionType
+            )}&section=${encodeURIComponent(
                 activeSection
             )}&success=${encodeURIComponent(
                 isPublishing ? "Edition published" : "Draft updated"
@@ -689,7 +691,9 @@ export async function saveDraft(formData: FormData) {
     }
 
     redirect(
-        `/offices/editions/new?edition=${data.id}&section=${encodeURIComponent(
+        `/offices/editions/new?edition=${data.id}&editionType=${encodeURIComponent(
+            editionType
+        )}&section=${encodeURIComponent(
             activeSection
         )}&success=${encodeURIComponent(
             isPublishing ? "Edition published" : "Draft saved"
@@ -801,14 +805,79 @@ export async function addManagerGrade(formData: FormData) {
     }
 
     const editionIdValue = formData.get("editionId");
+    const editionTypeValue = formData.get("draftGradesEditionType");
 
     const editionId =
         typeof editionIdValue === "string"
             ? editionIdValue.trim()
             : "";
 
+    const editionType =
+        typeof editionTypeValue === "string" && editionTypeValue.trim()
+            ? editionTypeValue.trim()
+            : "draft_grades";
+
     if (!editionId) {
         return;
+    }
+
+    // Save edits already made to existing manager grades
+    // before creating the next manager.
+    const managerGradeEntries = Array.from(formData.entries()).filter(
+        ([key]) => key.startsWith("managerGradeId:")
+    );
+
+    for (const [key] of managerGradeEntries) {
+        const managerGradeId = key.replace("managerGradeId:", "");
+
+        if (!managerGradeId) {
+            continue;
+        }
+
+        const managerValue = formData.get(
+            `managerGradeManager:${managerGradeId}`
+        );
+
+        const teamValue = formData.get(
+            `managerGradeTeam:${managerGradeId}`
+        );
+
+        const bodyValue = formData.get(
+            `managerGradeBody:${managerGradeId}`
+        );
+
+        const managerName =
+            typeof managerValue === "string"
+                ? managerValue.trim()
+                : "";
+
+        const teamName =
+            typeof teamValue === "string"
+                ? teamValue.trim()
+                : "";
+
+        const bodyHtml =
+            typeof bodyValue === "string"
+                ? bodyValue.trim()
+                : "";
+
+        const { error: updateError } = await supabase
+            .from("edition_manager_grades")
+            .update({
+                manager_name: managerName,
+                team_name: teamName,
+                body_html: bodyHtml,
+            })
+            .eq("id", Number(managerGradeId))
+            .eq("edition_id", editionId);
+
+        if (updateError) {
+            console.error(
+                "Unable to preserve manager grade before adding another:",
+                updateError
+            );
+            return;
+        }
     }
 
     const { data: existingManagerGrades } = await supabase
@@ -836,7 +905,98 @@ export async function addManagerGrade(formData: FormData) {
         return;
     }
 
-    revalidatePath("/offices/editions/new");
+    redirect(
+        `/offices/editions/new?edition=${editionId}&editionType=${encodeURIComponent(
+            editionType
+        )}&section=manager-grades`
+    );
+}
+
+export async function deleteManagerGrade(
+    editionId: string,
+    managerGradeId: number,
+    formData: FormData
+) {
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        return;
+    }
+
+    if (!editionId || !managerGradeId) {
+        return;
+    }
+
+    const managerGradeEntries = Array.from(formData.entries()).filter(
+        ([key]) => key.startsWith("managerGradeId:")
+    );
+
+    for (const [key] of managerGradeEntries) {
+        const currentManagerGradeId = key.replace("managerGradeId:", "");
+
+        if (
+            !currentManagerGradeId ||
+            Number(currentManagerGradeId) === managerGradeId
+        ) {
+            continue;
+        }
+
+        const managerValue = formData.get(
+            `managerGradeManager:${currentManagerGradeId}`
+        );
+
+        const teamValue = formData.get(
+            `managerGradeTeam:${currentManagerGradeId}`
+        );
+
+        const bodyValue = formData.get(
+            `managerGradeBody:${currentManagerGradeId}`
+        );
+
+        const managerName =
+            typeof managerValue === "string"
+                ? managerValue.trim()
+                : "";
+
+        const teamName =
+            typeof teamValue === "string"
+                ? teamValue.trim()
+                : "";
+
+        const bodyHtml =
+            typeof bodyValue === "string"
+                ? bodyValue.trim()
+                : "";
+
+        const { error: updateError } = await supabase
+            .from("edition_manager_grades")
+            .update({
+                manager_name: managerName,
+                team_name: teamName,
+                body_html: bodyHtml,
+            })
+            .eq("id", Number(currentManagerGradeId))
+            .eq("edition_id", editionId);
+
+        if (updateError) {
+            return;
+        }
+    }
+
+    const { error: deleteError } = await supabase
+        .from("edition_manager_grades")
+        .delete()
+        .eq("id", managerGradeId)
+        .eq("edition_id", editionId);
+
+    if (deleteError) {
+        return;
+    }
 }
 
 export async function addMatchup(formData: FormData) {

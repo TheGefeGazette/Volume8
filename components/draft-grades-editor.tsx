@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { GazetteRichTextEditor } from "@/components/gazette-rich-text-editor";
 import { draftGradesSections } from "@/lib/gazette/edition-sections";
-import { addManagerGrade } from "@/app/offices/editions/new/actions";
+import {
+    addManagerGrade,
+    deleteManagerGrade,
+} from "@/app/offices/editions/new/actions";
 import { SidebarBoxesEditor } from "@/components/sidebar-boxes-editor";
 
 type DraftGradesEditorProps = {
@@ -42,6 +46,79 @@ export function DraftGradesEditor({
             ? initialActiveSlug!
             : "draft-welcome"
     );
+
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
+
+    function handleAddManager(
+        event: React.MouseEvent<HTMLButtonElement>
+    ) {
+        event.preventDefault();
+
+        const form = event.currentTarget.form;
+
+        if (!form) {
+            return;
+        }
+
+        const formData = new FormData(form);
+        const scrollPosition = window.scrollY;
+
+        startTransition(async () => {
+            await addManagerGrade(formData);
+
+            router.refresh();
+
+            setTimeout(() => {
+                window.scrollTo({
+                    top: scrollPosition,
+                    behavior: "auto",
+                });
+            }, 50);
+        });
+    }
+
+    function handleDeleteManager(
+        event: React.MouseEvent<HTMLButtonElement>,
+        managerGradeId: number,
+        managerName: string
+    ) {
+        event.preventDefault();
+
+        const confirmed = window.confirm(
+            `Delete ${managerName || "this manager"}?\n\nThis cannot be undone.`
+        );
+
+        if (!confirmed || !editionId) {
+            return;
+        }
+
+        const form = event.currentTarget.form;
+
+        if (!form) {
+            return;
+        }
+
+        const formData = new FormData(form);
+        const scrollPosition = window.scrollY;
+
+        startTransition(async () => {
+            await deleteManagerGrade(
+                editionId,
+                managerGradeId,
+                formData
+            );
+
+            router.refresh();
+
+            setTimeout(() => {
+                window.scrollTo({
+                    top: scrollPosition,
+                    behavior: "auto",
+                });
+            }, 50);
+        });
+    }
     return (
         <>
             <input
@@ -78,6 +155,18 @@ export function DraftGradesEditor({
                             : ""
                             }`}
                     >
+                        {section.slug === "manager-grades" && editionId && (
+                            <div className="add-manager-sticky-wrap">
+                                <button
+                                    type="button"
+                                    className="office-secondary sticky-add-manager"
+                                    onClick={handleAddManager}
+                                    disabled={isPending}
+                                >
+                                    {isPending ? "Adding..." : "+ Add Manager"}
+                                </button>
+                            </div>
+                        )}
                         <div className="editor-paper">
                             <p className="eyebrow">
                                 {section.title}
@@ -85,16 +174,8 @@ export function DraftGradesEditor({
 
                             <h2>{section.title}</h2>
                             {section.slug === "manager-grades" ? (
-                                <div>
-                                    {editionId ? (
-                                        <button
-                                            type="submit"
-                                            className="office-secondary"
-                                            formAction={addManagerGrade}
-                                        >
-                                            + Add Manager
-                                        </button>
-                                    ) : (
+                                <div className="manager-grades-page">
+                                    {!editionId && (
                                         <p>
                                             Save this edition before adding manager grades.
                                         </p>
@@ -145,13 +226,37 @@ export function DraftGradesEditor({
                                     ) : (
                                         <div>
                                             {savedManagerGrades.map((managerGrade) => (
-                                                <div key={managerGrade.id}>
+                                                <div
+                                                    key={managerGrade.id}
+                                                    className="manager-grade-entry"
+                                                >
                                                     <input
                                                         type="hidden"
                                                         name={`managerGradeId:${managerGrade.id}`}
                                                         value={managerGrade.id}
                                                         readOnly
                                                     />
+
+                                                    <div className="manager-grade-heading-row">
+                                                        <strong>
+                                                            {managerGrade.manager_name || "Unnamed Manager"}
+                                                        </strong>
+
+                                                        <button
+                                                            type="button"
+                                                            className="office-secondary manager-grade-delete"
+                                                            disabled={isPending}
+                                                            onClick={(event) =>
+                                                                handleDeleteManager(
+                                                                    event,
+                                                                    managerGrade.id,
+                                                                    managerGrade.manager_name ?? ""
+                                                                )
+                                                            }
+                                                        >
+                                                            Delete Manager
+                                                        </button>
+                                                    </div>
 
                                                     <label>
                                                         Manager
@@ -225,6 +330,12 @@ export function DraftGradesEditor({
                 type="hidden"
                 name="draftGradesEditionId"
                 value={editionId ?? ""}
+            />
+
+            <input
+                type="hidden"
+                name="draftGradesEditionType"
+                value="draft_grades"
             />
         </>
     );

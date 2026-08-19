@@ -1818,3 +1818,35 @@ a {
   margin: 0;
   line-height: 1.55;
 }
+
+.add-manager-sticky-wrap {
+  position: sticky;
+  top: 6rem;
+  z-index: 50;
+  width: fit-content;
+  margin-left: auto;
+  margin-bottom: 0.75rem;
+}
+
+.sticky-add-manager {
+  width: auto;
+  min-width: 0;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.manager-grade-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.manager-grade-delete {
+  width: auto;
+  min-width: 0;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.8rem;
+}

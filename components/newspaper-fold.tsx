@@ -1,35 +1,52 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { Masthead } from "@/components/masthead";
 
 type NewspaperFoldProps = {
   latestEdition: {
     title: string;
-    subtitle: string;
+    subtitle: string | null;
     slug: string;
+    publication_date: string | null;
+    volume_number: number | null;
+    issue_number: number | null;
   };
 };
 
 export function NewspaperFold({
   latestEdition,
 }: NewspaperFoldProps) {
-  const [opened, setOpened] = useState(false);
+
+  const formattedPublicationDate = latestEdition.publication_date
+    ? new Date(`${latestEdition.publication_date}T00:00:00`).toLocaleDateString(
+      "en-US",
+      {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }
+    )
+    : undefined;
 
   return (
-    <section className={`desk-stage ${opened ? "is-open" : ""}`}>
+    <section className="desk-stage">
       <div className="paper-shadow" aria-hidden="true" />
 
       <article className="folded-paper">
         <div className="paper-top">
-          <Masthead />
+          <Masthead
+            volume={latestEdition.volume_number ?? undefined}
+            issue={latestEdition.issue_number ?? undefined}
+            date={formattedPublicationDate}
+          />
           <p className="edition-kicker">This Week&apos;s Edition</p>
           <h2>{latestEdition.title}</h2>
           <p className="edition-deck">{latestEdition.subtitle}</p>
         </div>
 
-        <div className="paper-bottom" aria-hidden={!opened}>
+        <div className="paper-bottom">
           <div className="front-grid">
             <section>
               <p className="section-kicker">Lead Story</p>
@@ -54,18 +71,12 @@ export function NewspaperFold({
       </article>
 
       <div className="fold-actions">
-        {!opened ? (
-          <button className="press-button" onClick={() => setOpened(true)}>
-            Read This Week&apos;s Edition
-          </button>
-        ) : (
-          <Link
-            className="press-button"
-            href={`/editions/${latestEdition.slug}`}
-          >
-            Enter the Edition
-          </Link>
-        )}
+        <Link
+          className="press-button"
+          href={`/editions/${latestEdition.slug}`}
+        >
+          Read This Week&apos;s Edition
+        </Link>
 
         <Link className="text-link" href="/offices">
           Visit The Gazette Offices
