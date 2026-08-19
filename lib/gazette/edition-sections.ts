@@ -48,8 +48,8 @@ export const draftGradesSections = [
     {
         title: "Welcome",
         heading: "Draft Grades and Preseason Predictions",
-        slug: "welcome",
-        fieldName: "welcomeBody",
+        slug: "draft-welcome",
+        fieldName: "draftWelcomeBody",
         placeholder:
             "Welcome the Gefes back, set the tone for the season, and explain how badly everyone drafted.",
         sortOrder: 0,

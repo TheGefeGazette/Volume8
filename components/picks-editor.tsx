@@ -16,11 +16,13 @@ type PicksEditorProps = {
         underdog: string | null;
         sort_order: number | null;
     }[];
+    tagline: string;
 };
 
 export function PicksEditor({
     editionId,
     picks,
+    tagline,
 }: PicksEditorProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
@@ -100,6 +102,16 @@ export function PicksEditor({
                     <p className="eyebrow">Sports Desk</p>
                     <h3>Next Week&apos;s Picks</h3>
                 </div>
+
+                <label className="picks-tagline-field">
+                    Picks Tagline
+                    <input
+                        type="text"
+                        name="picksTagline"
+                        defaultValue={tagline}
+                        placeholder="Expert analysis, questionable judgment, absolutely no refunds."
+                    />
+                </label>
 
                 <button
                     type="button"

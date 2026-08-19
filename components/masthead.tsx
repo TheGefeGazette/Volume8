@@ -15,7 +15,7 @@ export function Masthead({
     <header className="masthead">
       <div className="masthead-rule" />
       <h1>The Gefe Gazette</h1>
-      <p className="motto">All The Fake Football News Fit To Print</p>
+      <p className="motto">All The Fake Football News That's Fit To Print</p>
       <div className="masthead-rule double" />
       <div className="dateline">
         <span>Volume {toRoman(volume)}</span>

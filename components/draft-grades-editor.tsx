@@ -4,6 +4,7 @@ import { useState } from "react";
 import { GazetteRichTextEditor } from "@/components/gazette-rich-text-editor";
 import { draftGradesSections } from "@/lib/gazette/edition-sections";
 import { addManagerGrade } from "@/app/offices/editions/new/actions";
+import { SidebarBoxesEditor } from "@/components/sidebar-boxes-editor";
 
 type DraftGradesEditorProps = {
     editionId?: string;
@@ -16,6 +17,13 @@ type DraftGradesEditorProps = {
         body_html: string | null;
         sort_order: number | null;
     }[];
+
+    savedSidebarBoxes: {
+        id: number;
+        title: string | null;
+        body_html: string | null;
+        sort_order: number | null;
+    }[];
 };
 
 
@@ -25,13 +33,14 @@ export function DraftGradesEditor({
     initialActiveSlug,
     savedSectionBodies,
     savedManagerGrades,
+    savedSidebarBoxes,
 }: DraftGradesEditorProps) {
     const [activeSlug, setActiveSlug] = useState(
         draftGradesSections.some(
             (section) => section.slug === initialActiveSlug
         )
             ? initialActiveSlug!
-            : "welcome"
+            : "draft-welcome"
     );
     return (
         <>
@@ -92,9 +101,47 @@ export function DraftGradesEditor({
                                     )}
 
                                     {savedManagerGrades.length === 0 ? (
-                                        <p>
-                                            No manager grades have been added yet.
-                                        </p>
+                                        !editionId ? (
+                                            <div className="manager-grade-preview">
+                                                <label>
+                                                    Manager
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Manager name"
+                                                        disabled
+                                                    />
+                                                </label>
+
+                                                <label>
+                                                    Team
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Fantasy team name"
+                                                        disabled
+                                                    />
+                                                </label>
+
+                                                <div className="manager-grade-roster">
+                                                    <p className="eyebrow">Drafted Roster</p>
+
+                                                    <p>
+                                                        Yahoo roster data will appear here once league integration is available.
+                                                    </p>
+                                                </div>
+
+                                                <div className="manager-grade-writeup">
+                                                    <p className="eyebrow">Gazette Writeup</p>
+
+                                                    <p>
+                                                        Save this edition to begin adding manager grades.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <p>
+                                                No manager grades have been added yet.
+                                            </p>
+                                        )
                                     ) : (
                                         <div>
                                             {savedManagerGrades.map((managerGrade) => (
@@ -126,15 +173,41 @@ export function DraftGradesEditor({
                                                         />
                                                     </label>
 
-                                                    <GazetteRichTextEditor
-                                                        fieldName={`managerGradeBody:${managerGrade.id}`}
-                                                        initialContent={managerGrade.body_html ?? ""}
-                                                    />
+                                                    <div className="manager-grade-roster">
+                                                        <p className="eyebrow">Drafted Roster</p>
+
+                                                        <p>
+                                                            Yahoo roster data will appear here once league integration is available.
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="manager-grade-writeup">
+                                                        <p className="eyebrow">Gazette Writeup</p>
+
+                                                        <GazetteRichTextEditor
+                                                            fieldName={`managerGradeBody:${managerGrade.id}`}
+                                                            initialContent={managerGrade.body_html ?? ""}
+                                                        />
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
                                     )}
                                 </div>
+                            ) : section.slug === "draft-welcome" ? (
+                                <>
+                                    <GazetteRichTextEditor
+                                        fieldName={section.fieldName}
+                                        initialContent={
+                                            savedSectionBodies[section.slug] ?? ""
+                                        }
+                                    />
+
+                                    <SidebarBoxesEditor
+                                        editionId={editionId}
+                                        savedSidebarBoxes={savedSidebarBoxes}
+                                    />
+                                </>
                             ) : (
                                 <GazetteRichTextEditor
                                     fieldName={section.fieldName}

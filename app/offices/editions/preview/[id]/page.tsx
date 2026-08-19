@@ -23,7 +23,9 @@ export default async function PreviewEditionPage({
 
     const { data: edition, error: editionError } = await supabase
         .from("editions")
-        .select("id, title, subtitle, slug, status")
+        .select(
+            "id, title, subtitle, slug, status, publication_date, volume_number, issue_number, picks_tagline"
+        )
         .eq("id", id)
         .single();
 
@@ -53,6 +55,12 @@ export default async function PreviewEditionPage({
         .eq("edition_id", edition.id)
         .order("sort_order", { ascending: true });
 
+    const { data: sidebarBoxes, error: sidebarBoxesError } = await supabase
+        .from("edition_sidebar_boxes")
+        .select("id, title, body_html, sort_order")
+        .eq("edition_id", edition.id)
+        .order("sort_order", { ascending: true });
+
     const { data: bonehead, error: boneheadError } = await supabase
         .from("edition_boneheads")
         .select("recipient")
@@ -70,6 +78,18 @@ export default async function PreviewEditionPage({
         ]
         : [];
 
+    const formattedPublicationDate = edition.publication_date
+        ? new Date(`${edition.publication_date}T00:00:00`).toLocaleDateString(
+            "en-US",
+            {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+            }
+        )
+        : undefined;
+
     return (
         <main className="edition-page preview-edition-page">
             <div className="preview-banner">
@@ -81,7 +101,11 @@ export default async function PreviewEditionPage({
             </div>
 
             <article className="edition-sheet">
-                <Masthead />
+                <Masthead
+                    volume={edition.volume_number ?? undefined}
+                    issue={edition.issue_number ?? undefined}
+                    date={formattedPublicationDate}
+                />
 
                 <header className="lead-header">
                     <p className="section-kicker">The Week in Fake Football</p>
@@ -113,25 +137,27 @@ export default async function PreviewEditionPage({
                             <div className="preview-opening-layout">
                                 <section className="story-section preview-welcome-story">
 
-                                    <aside className="edition-sidebar">
-                                        <div className="staff-note">
-                                            <span>Today&apos;s Newsroom</span>
-                                            <p>
-                                                The over-caffeinated C.H.U.D.s survived another deadline with
-                                                only minor structural damage.
-                                            </p>
-                                            <small>Optional prototype module</small>
-                                        </div>
+                                    {!sidebarBoxesError && sidebarBoxes && sidebarBoxes.length > 0 && (
+                                        <aside className="edition-sidebar">
+                                            {sidebarBoxes.map((box) => (
+                                                <div
+                                                    className="optional-module"
+                                                    key={box.id}
+                                                >
+                                                    {box.title && <h4>{box.title}</h4>}
 
-                                        <div className="optional-module">
-                                            <span>Optional Newspaper Detail</span>
-                                            <h4>Corrections</h4>
-                                            <p>
-                                                Last week&apos;s paper suggested someone had learned a lesson.
-                                                We regret the error.
-                                            </p>
-                                        </div>
-                                    </aside>
+                                                    <div
+                                                        className="story-body"
+                                                        dangerouslySetInnerHTML={{
+                                                            __html:
+                                                                box.body_html ||
+                                                                "<p>This newspaper box remains unwritten.</p>",
+                                                        }}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </aside>
+                                    )}
 
                                     <div
                                         className="story-body"
@@ -192,7 +218,16 @@ export default async function PreviewEditionPage({
                                                         ))}
                                                 </div>
                                             ) : section.slug === "next-weeks-picks" ? (
-                                                <div className="structured-picks-preview">
+                                                <div className="structured-picks-preview gazette-sports-book">
+                                                    <div className="sports-book-header">
+                                                        <p className="eyebrow">The Gazette Sports Book</p>
+                                                        <h4>Next Week&apos;s Picks</h4>
+                                                        {edition.picks_tagline && (
+                                                            <p className="sports-book-tagline">
+                                                                {edition.picks_tagline}
+                                                            </p>
+                                                        )}
+                                                    </div>
                                                     {picksError && (
                                                         <p>
                                                             We were unable to retrieve next week&apos;s picks.
@@ -200,26 +235,21 @@ export default async function PreviewEditionPage({
                                                     )}
 
                                                     {!picksError &&
-                                                        (!picks || picks.length === 0) && (
-                                                            <p>
-                                                                No picks have been added yet.
-                                                            </p>
-                                                        )}
-
-                                                    {!picksError &&
                                                         picks?.map((pick) => (
-                                                            <p
+                                                            <div
                                                                 className="pick-preview-line"
                                                                 key={pick.id}
                                                             >
-                                                                <strong>
-                                                                    {pick.favorite || "Favorite"}
-                                                                </strong>{" "}
-                                                                {pick.joke_text || "does something unpleasant to"}{" "}
-                                                                <strong>
-                                                                    {pick.underdog || "Underdog"}
-                                                                </strong>.
-                                                            </p>
+                                                                <p>
+                                                                    <strong>
+                                                                        {pick.favorite || "Favorite"}
+                                                                    </strong>{" "}
+                                                                    {pick.joke_text || "does something unpleasant to"}{" "}
+                                                                    <strong>
+                                                                        {pick.underdog || "Underdog"}
+                                                                    </strong>.
+                                                                </p>
+                                                            </div>
                                                         ))}
                                                 </div>
                                             ) : section.slug === "bonehead-benching" ? (
@@ -275,9 +305,10 @@ export default async function PreviewEditionPage({
                                 })}
                             </div>
                         </>
-                    )}
-                </div>
-            </article>
+                    )
+                    }
+                </div >
+            </article >
         </main >
     );
 }

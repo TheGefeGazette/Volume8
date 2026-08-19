@@ -49,14 +49,24 @@ export default async function NewEditionPage({
     sort_order: number | null;
   }[] = [];
 
+  let savedSidebarBoxes: {
+    id: number;
+    title: string | null;
+    body_html: string | null;
+    sort_order: number | null;
+  }[] = [];
+
   let savedBoneheadRecipient = "";
 
   let savedEdition: {
     title: string;
     subtitle: string | null;
     edition_type: string;
+    publication_date: string | null;
+    volume_number: number | null;
+    issue_number: number | null;
+    picks_tagline: string | null;
   } | null = null;
-
   let savedSectionBodies: Record<string, string> = {};
 
   let savedSectionGifUrls: Record<string, string> = {};
@@ -72,7 +82,9 @@ export default async function NewEditionPage({
 
     const { data } = await supabase
       .from("editions")
-      .select("title, subtitle, edition_type")
+      .select(
+        "title, subtitle, edition_type, publication_date, volume_number, issue_number, picks_tagline"
+      )
       .eq("id", editionId)
       .single();
 
@@ -135,6 +147,16 @@ export default async function NewEditionPage({
       .order("sort_order", { ascending: true });
 
     savedManagerGrades = managerGradesData ?? [];
+
+    const { data: sidebarBoxesData } = await supabase
+      .from("edition_sidebar_boxes")
+      .select(
+        "id, title, body_html, sort_order"
+      )
+      .eq("edition_id", editionId)
+      .order("sort_order", { ascending: true });
+
+    savedSidebarBoxes = sidebarBoxesData ?? [];
 
     const { data: boneheadData } = await supabase
       .from("edition_boneheads")
@@ -239,6 +261,19 @@ export default async function NewEditionPage({
               placeholder="A dignified summary of this week’s indignities"
             />
           </label>
+
+          <div className="edition-masthead-fields">
+            <label>
+              Publication Date
+              <input
+                type="date"
+                name="publicationDate"
+                defaultValue={savedEdition?.publication_date ?? ""}
+              />
+            </label>
+
+
+          </div>
         </section>
 
 
@@ -251,8 +286,12 @@ export default async function NewEditionPage({
           customSections={customSections}
           savedMatchups={savedMatchups}
           savedPicks={savedPicks}
+          savedPicksTagline={savedEdition?.picks_tagline ?? ""}
           savedManagerGrades={savedManagerGrades}
+          savedSidebarBoxes={savedSidebarBoxes}
           savedBoneheadRecipient={savedBoneheadRecipient}
+          initialVolumeNumber={savedEdition?.volume_number ?? null}
+          initialIssueNumber={savedEdition?.issue_number ?? null}
         />
 
 

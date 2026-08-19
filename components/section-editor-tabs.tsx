@@ -13,6 +13,7 @@ import {
 } from "@/lib/gazette/edition-sections";
 import { PicksEditor } from "@/components/picks-editor";
 import { DraftGradesEditor } from "@/components/draft-grades-editor";
+import { SidebarBoxesEditor } from "@/components/sidebar-boxes-editor";
 
 type SectionEditorTabsProps = {
     savedSectionBodies: Record<string, string>;
@@ -42,10 +43,18 @@ type SectionEditorTabsProps = {
         underdog: string | null;
         sort_order: number | null;
     }[];
+    savedPicksTagline: string;
     savedManagerGrades: {
         id: number;
         manager_name: string | null;
         team_name: string | null;
+        body_html: string | null;
+        sort_order: number | null;
+    }[];
+
+    savedSidebarBoxes: {
+        id: number;
+        title: string | null;
         body_html: string | null;
         sort_order: number | null;
     }[];
@@ -62,7 +71,9 @@ export function SectionEditorTabs({
     customSections = [],
     savedMatchups,
     savedPicks,
+    savedPicksTagline,
     savedManagerGrades,
+    savedSidebarBoxes,
     savedBoneheadRecipient,
 }: SectionEditorTabsProps) {
     const router = useRouter();
@@ -133,6 +144,7 @@ export function SectionEditorTabs({
                 initialActiveSlug={initialActiveSlug}
                 savedSectionBodies={savedSectionBodies}
                 savedManagerGrades={savedManagerGrades}
+                savedSidebarBoxes={savedSidebarBoxes}
             />
         );
     }
@@ -217,6 +229,7 @@ export function SectionEditorTabs({
                                 <PicksEditor
                                     editionId={editionId}
                                     picks={savedPicks}
+                                    tagline={savedPicksTagline}
                                 />
                             ) : section.slug === "bonehead-benching" ? (
                                 <>
@@ -237,12 +250,25 @@ export function SectionEditorTabs({
                                         initialContent={savedSectionBodies[section.slug] ?? ""}
                                     />
                                 </>
+                            ) : section.slug === "welcome" ? (
+                                <>
+                                    <GazetteRichTextEditor
+                                        fieldName={section.fieldName}
+                                        initialContent={savedSectionBodies[section.slug] ?? ""}
+                                    />
+
+                                    <SidebarBoxesEditor
+                                        editionId={editionId}
+                                        savedSidebarBoxes={savedSidebarBoxes}
+                                    />
+                                </>
                             ) : (
                                 <GazetteRichTextEditor
                                     fieldName={section.fieldName}
                                     initialContent={savedSectionBodies[section.slug] ?? ""}
                                 />
                             )}
+
 
                             <input
                                 type="hidden"

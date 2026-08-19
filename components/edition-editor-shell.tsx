@@ -1,6 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import {
+    usePathname,
+    useRouter,
+    useSearchParams,
+} from "next/navigation";
 import { EditionTypeSelect } from "@/components/edition-type-select";
 import { SectionEditorTabs } from "@/components/section-editor-tabs";
 
@@ -9,6 +14,8 @@ type EditionEditorShellProps = {
     savedSectionBodies: Record<string, string>;
     savedSectionGifUrls: Record<string, string>;
     initialActiveSlug?: string;
+    initialVolumeNumber: number | null;
+    initialIssueNumber: number | null;
     editionId?: string;
     customSections: {
         title: string;
@@ -32,10 +39,17 @@ type EditionEditorShellProps = {
         underdog: string | null;
         sort_order: number | null;
     }[];
+    savedPicksTagline: string;
     savedManagerGrades: {
         id: number;
         manager_name: string | null;
         team_name: string | null;
+        body_html: string | null;
+        sort_order: number | null;
+    }[];
+    savedSidebarBoxes: {
+        id: number;
+        title: string | null;
         body_html: string | null;
         sort_order: number | null;
     }[];
@@ -51,61 +65,117 @@ export function EditionEditorShell({
     customSections,
     savedMatchups,
     savedPicks,
+    savedPicksTagline,
     savedManagerGrades,
+    savedSidebarBoxes,
     savedBoneheadRecipient,
+    initialVolumeNumber,
+    initialIssueNumber,
 }: EditionEditorShellProps) {
-    const [editionType, setEditionType] = useState(initialEditionType);
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    const editionTypeFromUrl = searchParams.get("editionType");
+
+    const [editionType, setEditionType] = useState(
+        editionTypeFromUrl ?? initialEditionType
+    );
+
+    function chooseEditionType(value: string) {
+        setEditionType(value);
+
+        const params = new URLSearchParams(searchParams.toString());
+
+        params.set("editionType", value);
+        params.delete("success");
+        params.delete("error");
+
+        router.replace(`${pathname}?${params.toString()}`, {
+            scroll: false,
+        });
+    }
 
     return (
-        <div className="edition-editor-wrapper">
-            <section className="editor-canvas editor-edition-details">
-                <label>
-                    Edition Type
-                    <EditionTypeSelect
-                        value={editionType}
-                        onChange={setEditionType}
-                    />
-                </label>
-            </section>
+        <>
+            {editionType === "regular_season" && (
+                <section className="editor-canvas editor-edition-details">
+                    <div className="edition-masthead-fields">
+                        <label>
+                            Volume
+                            <input
+                                type="number"
+                                name="volumeNumber"
+                                min="1"
+                                defaultValue={initialVolumeNumber ?? ""}
+                            />
+                        </label>
 
-            <div className="editor-shell">
-                <SectionEditorTabs
-                    savedSectionBodies={savedSectionBodies}
-                    savedSectionGifUrls={savedSectionGifUrls}
-                    initialActiveSlug={initialActiveSlug}
-                    editionId={editionId}
-                    editionType={editionType}
-                    customSections={customSections}
-                    savedMatchups={savedMatchups}
-                    savedPicks={savedPicks}
-                    savedManagerGrades={savedManagerGrades}
-                    savedBoneheadRecipient={savedBoneheadRecipient}
-                />
-
-                <aside className="tool-drawer">
-                    <h2>Newsroom Tools</h2>
-
-                    <button type="button">
-                        AI Newsroom <small>Assistant only</small>
-                    </button>
-
-                    <button type="button">
-                        GIF Search <small>Coming later</small>
-                    </button>
-
-                    <button type="button">
-                        Image Studio <small>Coming later</small>
-                    </button>
-
-                    <div className="principle">
-                        <strong>Rule No. 1</strong>
-                        <p>
-                            The AI is the newsroom assistant—not the
-                            editor-in-chief.
-                        </p>
+                        <label>
+                            Issue Number
+                            <input
+                                type="number"
+                                name="issueNumber"
+                                min="1"
+                                defaultValue={initialIssueNumber ?? ""}
+                            />
+                        </label>
                     </div>
-                </aside>
+                </section>
+            )}
+
+            <div className="edition-editor-wrapper">
+                <section className="editor-canvas editor-edition-details">
+                    <label>
+                        Edition Type
+                        <EditionTypeSelect
+                            value={editionType}
+                            onChange={chooseEditionType}
+                        />
+                    </label>
+                </section>
+
+                <div className="editor-shell">
+                    <SectionEditorTabs
+                        savedSectionBodies={savedSectionBodies}
+                        savedSectionGifUrls={savedSectionGifUrls}
+                        initialActiveSlug={initialActiveSlug}
+                        editionId={editionId}
+                        editionType={editionType}
+                        customSections={customSections}
+                        savedMatchups={savedMatchups}
+                        savedPicks={savedPicks}
+                        savedPicksTagline={savedPicksTagline}
+                        savedManagerGrades={savedManagerGrades}
+                        savedSidebarBoxes={savedSidebarBoxes}
+                        savedBoneheadRecipient={savedBoneheadRecipient}
+                    />
+
+                    <aside className="tool-drawer">
+                        <h2>Newsroom Tools</h2>
+
+                        <button type="button">
+                            AI Newsroom <small>Assistant only</small>
+                        </button>
+
+                        <button type="button">
+                            GIF Search <small>Coming later</small>
+                        </button>
+
+                        <button type="button">
+                            Image Studio <small>Coming later</small>
+                        </button>
+
+                        <div className="principle">
+                            <strong>Rule No. 1</strong>
+                            <p>
+                                The AI is the newsroom assistant—not the
+                                editor-in-chief.
+                            </p>
+                        </div>
+                    </aside>
+                </div>
             </div>
-        </div>
+        </>
     );
 }

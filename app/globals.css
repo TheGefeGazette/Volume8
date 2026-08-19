@@ -1781,3 +1781,40 @@ a {
 .status-card-link article:hover {
   border-color: rgba(255, 255, 255, 0.35);
 }
+
+.gazette-sports-book {
+  border: 2px solid currentColor;
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+
+.sports-book-header {
+  text-align: center;
+  border-bottom: 2px solid currentColor;
+  padding-bottom: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.sports-book-header h4 {
+  margin: 0.15rem 0 0.35rem;
+  font-size: 1.6rem;
+}
+
+.sports-book-tagline {
+  margin: 0;
+  font-style: italic;
+}
+
+.pick-preview-line {
+  padding: 0.9rem 0;
+  border-bottom: 1px solid currentColor;
+}
+
+.pick-preview-line:last-child {
+  border-bottom: 0;
+}
+
+.pick-preview-line p {
+  margin: 0;
+  line-height: 1.55;
+}

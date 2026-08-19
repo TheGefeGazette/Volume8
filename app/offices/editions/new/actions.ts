@@ -8,6 +8,87 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+export async function deleteSidebarBox(
+    boxId: number,
+    editionId: string
+) {
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        return;
+    }
+
+    if (!editionId || !boxId) {
+        return;
+    }
+
+    const { error } = await supabase
+        .from("edition_sidebar_boxes")
+        .delete()
+        .eq("id", boxId)
+        .eq("edition_id", editionId);
+
+    if (error) {
+        console.error("Unable to delete sidebar box:", error);
+        return;
+    }
+
+    revalidatePath("/offices/editions/new");
+}
+export async function addSidebarBox(formData: FormData) {
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        return;
+    }
+
+    const editionIdValue = formData.get("editionId");
+
+    const editionId =
+        typeof editionIdValue === "string"
+            ? editionIdValue.trim()
+            : "";
+
+    if (!editionId) {
+        return;
+    }
+
+    const { data: existingBoxes } = await supabase
+        .from("edition_sidebar_boxes")
+        .select("sort_order")
+        .eq("edition_id", editionId)
+        .order("sort_order", { ascending: false })
+        .limit(1);
+
+    const highestSortOrder =
+        existingBoxes?.[0]?.sort_order ?? -1;
+
+    const { error } = await supabase
+        .from("edition_sidebar_boxes")
+        .insert({
+            edition_id: editionId,
+            title: "",
+            body_html: "",
+            sort_order: highestSortOrder + 1,
+        });
+
+    if (error) {
+        console.error("Unable to add sidebar box:", error);
+        return;
+    }
+
+    revalidatePath("/offices/editions/new");
+}
 export async function saveDraft(formData: FormData) {
     const supabase = await createClient();
 
@@ -25,6 +106,10 @@ export async function saveDraft(formData: FormData) {
     const titleValue = formData.get("title");
     const subtitleValue = formData.get("subtitle");
     const editionTypeValue = formData.get("editionType");
+    const picksTaglineValue = formData.get("picksTagline");
+    const publicationDateValue = formData.get("publicationDate");
+    const volumeNumberValue = formData.get("volumeNumber");
+    const issueNumberValue = formData.get("issueNumber");
     const activeSection =
         typeof activeSectionValue === "string" && activeSectionValue.trim()
             ? activeSectionValue.trim()
@@ -48,6 +133,26 @@ export async function saveDraft(formData: FormData) {
         typeof editionTypeValue === "string" && editionTypeValue.trim()
             ? editionTypeValue.trim()
             : "regular_season";
+
+    const picksTagline =
+        typeof picksTaglineValue === "string"
+            ? picksTaglineValue.trim()
+            : "";
+
+    const publicationDate =
+        typeof publicationDateValue === "string" && publicationDateValue.trim()
+            ? publicationDateValue.trim()
+            : null;
+
+    const volumeNumber =
+        typeof volumeNumberValue === "string" && volumeNumberValue.trim()
+            ? Number(volumeNumberValue)
+            : null;
+
+    const issueNumber =
+        typeof issueNumberValue === "string" && issueNumberValue.trim()
+            ? Number(issueNumberValue)
+            : null;
 
     const sectionsForEdition =
         editionType === "draft_grades"
@@ -332,6 +437,53 @@ export async function saveDraft(formData: FormData) {
         return null;
     }
 
+    async function saveSidebarBoxes(targetEditionId: string) {
+        const sidebarBoxIdEntries = Array.from(formData.entries()).filter(
+            ([key]) => key.startsWith("sidebarBoxId:")
+        );
+
+        for (const [key, value] of sidebarBoxIdEntries) {
+            const sidebarBoxId = key.replace("sidebarBoxId:", "");
+
+            if (!sidebarBoxId || typeof value !== "string") {
+                continue;
+            }
+
+            const titleValue = formData.get(
+                `sidebarBoxTitle:${sidebarBoxId}`
+            );
+
+            const bodyValue = formData.get(
+                `sidebarBoxBody:${sidebarBoxId}`
+            );
+
+            const title =
+                typeof titleValue === "string"
+                    ? titleValue.trim()
+                    : "";
+
+            const bodyHtml =
+                typeof bodyValue === "string"
+                    ? bodyValue.trim()
+                    : "";
+
+            const { error: updateError } = await supabase
+                .from("edition_sidebar_boxes")
+                .update({
+                    title,
+                    body_html: bodyHtml,
+                })
+                .eq("id", Number(sidebarBoxId))
+                .eq("edition_id", targetEditionId);
+
+            if (updateError) {
+                return updateError;
+            }
+        }
+
+        return null;
+    }
+
     async function saveBoneheadRecipient(targetEditionId: string) {
         const recipientValue = formData.get("boneheadRecipient");
 
@@ -378,6 +530,10 @@ export async function saveDraft(formData: FormData) {
                 title,
                 subtitle,
                 edition_type: editionType,
+                publication_date: publicationDate,
+                volume_number: volumeNumber,
+                issue_number: issueNumber,
+                picks_tagline: picksTagline,
                 status: isPublishing ? "published" : "draft",
             })
             .eq("id", editionId);
@@ -451,6 +607,18 @@ export async function saveDraft(formData: FormData) {
             );
         }
 
+        const sidebarBoxesSaveError = await saveSidebarBoxes(editionId);
+
+        if (sidebarBoxesSaveError) {
+            redirect(
+                `/offices/editions/new?edition=${editionId}&section=${encodeURIComponent(
+                    activeSection
+                )}&error=${encodeURIComponent(
+                    sidebarBoxesSaveError.message
+                )}`
+            );
+        }
+
         const boneheadSaveError = await saveBoneheadRecipient(editionId);
 
         if (boneheadSaveError) {
@@ -486,6 +654,10 @@ export async function saveDraft(formData: FormData) {
             subtitle,
             edition_type: editionType,
             slug,
+            publication_date: publicationDate,
+            volume_number: volumeNumber,
+            issue_number: issueNumber,
+            picks_tagline: picksTagline,
             status: isPublishing ? "published" : "draft",
         })
         .select("id")
