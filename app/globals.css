@@ -1850,3 +1850,73 @@ a {
   padding: 0.4rem 0.7rem;
   font-size: 0.8rem;
 }
+
+.manager-grade-preview-card {
+  padding: 2rem 0 3rem;
+  border-bottom: 3px double #2b2118;
+  margin-bottom: 3rem;
+}
+
+.manager-grade-preview-card:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.floating-save-draft {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 90;
+  width: auto;
+  min-width: 120px;
+  padding: 0.65rem 1rem;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.28);
+}
+
+@media (max-width: 600px) {
+  .preview-welcome-story {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .preview-welcome-story>.story-body {
+    order: 1;
+    width: 100%;
+  }
+
+  .preview-welcome-story>.story-gif {
+    order: 2;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .preview-welcome-story>.edition-sidebar {
+    order: 3;
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+
+  .edition-sidebar .optional-module,
+  .edition-sidebar .staff-note {
+    width: 100%;
+  }
+
+  .bonehead-award-closing {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    max-width: 100%;
+  }
+
+  .bonehead-award-ending {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .bonehead-static-trophy {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+}

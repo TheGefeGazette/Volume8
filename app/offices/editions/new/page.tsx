@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EditionEditorShell } from "@/components/edition-editor-shell";
 import { createClient } from "@/lib/supabase/server";
 import { saveDraft } from "./actions";
+import { FloatingSaveDraft } from "@/components/floating-save-draft";
 
 type NewEditionPageProps = {
   searchParams: Promise<{
@@ -214,6 +215,8 @@ export default async function NewEditionPage({
             </div>
           </div>
         </header>
+
+        <FloatingSaveDraft />
 
         {success && (
           <div
