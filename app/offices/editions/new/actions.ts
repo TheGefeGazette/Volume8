@@ -404,6 +404,14 @@ export async function saveDraft(formData: FormData) {
                 `managerGradeBody:${managerGradeId}`
             );
 
+            const rosterImageValue = formData.get(
+                `managerGradeRosterImage:${managerGradeId}`
+            );
+
+            const rosterImageValue2 = formData.get(
+                `managerGradeRosterImage2:${managerGradeId}`
+            );
+
             const managerName =
                 typeof managerValue === "string"
                     ? managerValue.trim()
@@ -419,12 +427,24 @@ export async function saveDraft(formData: FormData) {
                     ? bodyValue.trim()
                     : "";
 
+            const rosterImageUrl =
+                typeof rosterImageValue === "string"
+                    ? rosterImageValue.trim()
+                    : "";
+
+            const rosterImageUrl2 =
+                typeof rosterImageValue2 === "string"
+                    ? rosterImageValue2.trim()
+                    : "";
+
             const { error: updateError } = await supabase
                 .from("edition_manager_grades")
                 .update({
                     manager_name: managerName,
                     team_name: teamName,
                     body_html: bodyHtml,
+                    roster_image_url: rosterImageUrl,
+                    roster_image_url_2: rosterImageUrl2,
                 })
                 .eq("id", Number(managerGradeId))
                 .eq("edition_id", targetEditionId);
@@ -846,6 +866,14 @@ export async function addManagerGrade(formData: FormData) {
             `managerGradeBody:${managerGradeId}`
         );
 
+        const rosterImageValue = formData.get(
+            `managerGradeRosterImage:${managerGradeId}`
+        );
+
+        const rosterImageValue2 = formData.get(
+            `managerGradeRosterImage2:${managerGradeId}`
+        );
+
         const managerName =
             typeof managerValue === "string"
                 ? managerValue.trim()
@@ -861,12 +889,24 @@ export async function addManagerGrade(formData: FormData) {
                 ? bodyValue.trim()
                 : "";
 
+        const rosterImageUrl =
+            typeof rosterImageValue === "string"
+                ? rosterImageValue.trim()
+                : "";
+
+        const rosterImageUrl2 =
+            typeof rosterImageValue2 === "string"
+                ? rosterImageValue2.trim()
+                : "";
+
         const { error: updateError } = await supabase
             .from("edition_manager_grades")
             .update({
                 manager_name: managerName,
                 team_name: teamName,
                 body_html: bodyHtml,
+                roster_image_url: rosterImageUrl,
+                roster_image_url_2: rosterImageUrl2,
             })
             .eq("id", Number(managerGradeId))
             .eq("edition_id", editionId);
@@ -958,6 +998,14 @@ export async function deleteManagerGrade(
             `managerGradeBody:${currentManagerGradeId}`
         );
 
+        const rosterImageValue = formData.get(
+            `managerGradeRosterImage:${currentManagerGradeId}`
+        );
+
+        const rosterImageValue2 = formData.get(
+            `managerGradeRosterImage2:${managerGradeId}`
+        );
+
         const managerName =
             typeof managerValue === "string"
                 ? managerValue.trim()
@@ -973,12 +1021,24 @@ export async function deleteManagerGrade(
                 ? bodyValue.trim()
                 : "";
 
+        const rosterImageUrl =
+            typeof rosterImageValue === "string"
+                ? rosterImageValue.trim()
+                : "";
+
+        const rosterImageUrl2 =
+            typeof rosterImageValue2 === "string"
+                ? rosterImageValue2.trim()
+                : "";
+
         const { error: updateError } = await supabase
             .from("edition_manager_grades")
             .update({
                 manager_name: managerName,
                 team_name: teamName,
                 body_html: bodyHtml,
+                roster_image_url: rosterImageUrl,
+                roster_image_url_2: rosterImageUrl2,
             })
             .eq("id", Number(currentManagerGradeId))
             .eq("edition_id", editionId);

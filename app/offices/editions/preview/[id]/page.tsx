@@ -64,7 +64,7 @@ export default async function PreviewEditionPage({
     const { data: managerGrades, error: managerGradesError } = await supabase
         .from("edition_manager_grades")
         .select(
-            "id, manager_name, team_name, body_html, sort_order"
+            "id, manager_name, team_name, body_html, roster_image_url, roster_image_url_2, sort_order"
         )
         .eq("edition_id", edition.id)
         .order("sort_order", { ascending: true });
@@ -208,9 +208,30 @@ export default async function PreviewEditionPage({
 
                                                 <div className="manager-grade-roster">
                                                     <p className="eyebrow">Drafted Roster</p>
-                                                    <p>
-                                                        Yahoo roster data will appear here once league integration is available.
-                                                    </p>
+
+                                                    {managerGrade.roster_image_url || managerGrade.roster_image_url_2 ? (
+                                                        <div className="manager-grade-roster-images">
+                                                            {managerGrade.roster_image_url && (
+                                                                <img
+                                                                    src={managerGrade.roster_image_url}
+                                                                    alt={`${managerGrade.manager_name || "Manager"} drafted roster part 1`}
+                                                                    className="manager-grade-roster-image"
+                                                                />
+                                                            )}
+
+                                                            {managerGrade.roster_image_url_2 && (
+                                                                <img
+                                                                    src={managerGrade.roster_image_url_2}
+                                                                    alt={`${managerGrade.manager_name || "Manager"} drafted roster part 2`}
+                                                                    className="manager-grade-roster-image"
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <p>
+                                                            Yahoo roster data will appear here once league integration is available.
+                                                        </p>
+                                                    )}
                                                 </div>
 
                                                 <div

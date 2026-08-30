@@ -142,7 +142,7 @@ export default async function NewEditionPage({
     const { data: managerGradesData } = await supabase
       .from("edition_manager_grades")
       .select(
-        "id, manager_name, team_name, body_html, sort_order"
+        "id, manager_name, team_name, body_html, roster_image_url, roster_image_url_2, sort_order"
       )
       .eq("edition_id", editionId)
       .order("sort_order", { ascending: true });

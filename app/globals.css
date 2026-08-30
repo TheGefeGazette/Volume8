@@ -1851,6 +1851,26 @@ a {
   font-size: 0.8rem;
 }
 
+.manager-grade-roster-image {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin: 1rem auto;
+}
+
+.manager-grade-roster-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.manager-grade-roster-images .manager-grade-roster-image {
+  max-width: none;
+  margin: 1rem 0;
+}
+
 .manager-grade-preview-card {
   padding: 2rem 0 3rem;
   border-bottom: 3px double #2b2118;

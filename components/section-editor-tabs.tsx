@@ -49,6 +49,8 @@ type SectionEditorTabsProps = {
         manager_name: string | null;
         team_name: string | null;
         body_html: string | null;
+        roster_image_url: string | null;
+        roster_image_url_2: string | null;
         sort_order: number | null;
     }[];
 

@@ -9,6 +9,7 @@ import {
     deleteManagerGrade,
 } from "@/app/offices/editions/new/actions";
 import { SidebarBoxesEditor } from "@/components/sidebar-boxes-editor";
+import { PictureUpload } from "@/components/picture-upload";
 
 type DraftGradesEditorProps = {
     editionId?: string;
@@ -19,6 +20,8 @@ type DraftGradesEditorProps = {
         manager_name: string | null;
         team_name: string | null;
         body_html: string | null;
+        roster_image_url: string | null;
+        roster_image_url_2: string | null;
         sort_order: number | null;
     }[];
 
@@ -49,6 +52,28 @@ export function DraftGradesEditor({
 
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
+
+    const [rosterImageUrls, setRosterImageUrls] = useState<
+        Record<number, string>
+    >(
+        Object.fromEntries(
+            savedManagerGrades.map((managerGrade) => [
+                managerGrade.id,
+                managerGrade.roster_image_url ?? "",
+            ])
+        )
+    );
+
+    const [rosterImageUrls2, setRosterImageUrls2] = useState<
+        Record<number, string>
+    >(
+        Object.fromEntries(
+            savedManagerGrades.map((managerGrade) => [
+                managerGrade.id,
+                managerGrade.roster_image_url_2 ?? "",
+            ])
+        )
+    );
 
     function handleAddManager(
         event: React.MouseEvent<HTMLButtonElement>
@@ -281,10 +306,93 @@ export function DraftGradesEditor({
                                                     <div className="manager-grade-roster">
                                                         <p className="eyebrow">Drafted Roster</p>
 
-                                                        <p>
-                                                            Yahoo roster data will appear here once league integration is available.
-                                                        </p>
+                                                        <input
+                                                            type="hidden"
+                                                            name={`managerGradeRosterImage:${managerGrade.id}`}
+                                                            value={rosterImageUrls[managerGrade.id] ?? ""}
+                                                            readOnly
+                                                        />
+
+                                                        <input
+                                                            type="hidden"
+                                                            name={`managerGradeRosterImage2:${managerGrade.id}`}
+                                                            value={rosterImageUrls2[managerGrade.id] ?? ""}
+                                                            readOnly
+                                                        />
+
+                                                        {rosterImageUrls[managerGrade.id] || rosterImageUrls2[managerGrade.id] ? (
+                                                            <div className="manager-grade-roster-images">
+                                                                {rosterImageUrls[managerGrade.id] && (
+                                                                    <img
+                                                                        src={rosterImageUrls[managerGrade.id]}
+                                                                        alt={`${managerGrade.manager_name || "Manager"} drafted roster part 1`}
+                                                                        className="manager-grade-roster-image"
+                                                                    />
+                                                                )}
+
+                                                                {rosterImageUrls2[managerGrade.id] && (
+                                                                    <img
+                                                                        src={rosterImageUrls2[managerGrade.id]}
+                                                                        alt={`${managerGrade.manager_name || "Manager"} drafted roster part 2`}
+                                                                        className="manager-grade-roster-image"
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <p>
+                                                                Upload roster screenshots while Yahoo league integration is unavailable.
+                                                            </p>
+                                                        )}
+
+                                                        <PictureUpload
+                                                            onPictureUploaded={(imageUrl) => {
+                                                                setRosterImageUrls((current) => ({
+                                                                    ...current,
+                                                                    [managerGrade.id]: imageUrl,
+                                                                }));
+                                                            }}
+                                                        />
+
+                                                        <PictureUpload
+                                                            onPictureUploaded={(imageUrl) => {
+                                                                setRosterImageUrls2((current) => ({
+                                                                    ...current,
+                                                                    [managerGrade.id]: imageUrl,
+                                                                }));
+                                                            }}
+                                                        />
+
+                                                        {rosterImageUrls[managerGrade.id] && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setRosterImageUrls((current) => ({
+                                                                        ...current,
+                                                                        [managerGrade.id]: "",
+                                                                    }));
+                                                                }}
+                                                            >
+                                                                Remove Image
+                                                            </button>
+                                                        )}
+
+                                                        {rosterImageUrls2[managerGrade.id] && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setRosterImageUrls2((current) => ({
+                                                                        ...current,
+                                                                        [managerGrade.id]: "",
+                                                                    }));
+                                                                }}
+                                                            >
+                                                                Remove Second Image
+                                                            </button>
+                                                        )}
                                                     </div>
+
+
+
 
                                                     <div className="manager-grade-writeup">
                                                         <p className="eyebrow">Gazette Writeup</p>
@@ -324,7 +432,7 @@ export function DraftGradesEditor({
                         </div>
                     </div>
                 ))}
-            </div>
+            </div >
 
             <input
                 type="hidden"
