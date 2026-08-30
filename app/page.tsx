@@ -1,4 +1,4 @@
-import { NewspaperFold } from "@/components/newspaper-fold";
+import { PublicOfficeHome } from "@/components/public-office-home";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function HomePage() {
@@ -24,8 +24,9 @@ export default async function HomePage() {
   };
 
   return (
-    <main>
-      <NewspaperFold latestEdition={homepageEdition} />
-    </main>
+    <PublicOfficeHome
+      latestEdition={homepageEdition}
+      showEditorLink={false}
+    />
   );
 }

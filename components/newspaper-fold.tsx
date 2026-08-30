@@ -78,7 +78,7 @@ export function NewspaperFold({
           Read This Week&apos;s Edition
         </Link>
 
-        <Link className="text-link" href="/offices">
+        <Link className="text-link" href="/">
           Visit The Gazette Offices
         </Link>
       </div>

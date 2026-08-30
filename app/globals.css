@@ -1920,3 +1920,130 @@ a {
     height: auto;
   }
 }
+
+/* =========================================
+   PUBLIC GEFE GAZETTE OFFICES HOMEPAGE
+   ========================================= */
+
+.public-office-home {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at center, #30271f 0%, #15110e 75%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 1.5rem;
+}
+
+.public-office-scene {
+  position: relative;
+  width: min(100%, 1536px);
+  margin: 0 auto;
+}
+
+.public-office-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.public-office-hotspots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.office-hotspot {
+  position: absolute;
+  bottom: 1.7%;
+  height: 8.5%;
+  pointer-events: auto;
+  border-radius: 0.35rem;
+}
+
+.office-hotspot-edition {
+  left: 1.3%;
+  width: 15.4%;
+  cursor: pointer;
+}
+
+.office-hotspot-trophy {
+  left: 17.4%;
+  width: 15.2%;
+}
+
+.office-hotspot-history {
+  left: 33.3%;
+  width: 15.2%;
+}
+
+.office-hotspot-archive {
+  left: 49.2%;
+  width: 15.2%;
+}
+
+.office-hotspot-bonehead {
+  left: 65.1%;
+  width: 17%;
+}
+
+.office-hotspot-lil-gefe {
+  left: 82.8%;
+  width: 15.4%;
+}
+
+a.office-hotspot:hover,
+a.office-hotspot:focus-visible {
+  outline: 3px solid rgba(255, 236, 180, 0.8);
+  outline-offset: -3px;
+  background: rgba(255, 245, 210, 0.08);
+}
+
+.public-office-editor-link {
+  position: absolute;
+  top: 1.5%;
+  right: 1.5%;
+  z-index: 5;
+
+  padding: 0.65rem 0.9rem;
+  border: 1px solid rgba(231, 215, 177, 0.55);
+  border-radius: 0.3rem;
+
+  background: rgba(24, 19, 15, 0.82);
+  color: #eee1c4;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+
+  backdrop-filter: blur(4px);
+}
+
+.public-office-editor-link:hover {
+  background: rgba(47, 37, 28, 0.92);
+}
+
+@media (max-width: 600px) {
+  .public-office-home {
+    min-height: auto;
+    padding: 0;
+    background: #15110e;
+  }
+
+  .public-office-scene {
+    width: 100%;
+  }
+
+  .public-office-image {
+    width: 100%;
+  }
+
+  .public-office-editor-link {
+    top: 1%;
+    right: 2%;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.65rem;
+  }
+}
