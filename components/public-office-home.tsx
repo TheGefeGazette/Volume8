@@ -27,6 +27,7 @@ export function PublicOfficeHome({
                     alt="The Gefe Gazette Offices"
                 />
 
+
                 <div
                     className="public-office-hotspots"
                     aria-label="Gazette Offices navigation"

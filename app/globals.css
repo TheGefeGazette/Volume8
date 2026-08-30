@@ -1957,7 +1957,7 @@ a {
 
 .public-office-scene {
   position: relative;
-  width: min(100%, 1536px);
+  width: min(100%, 1536px, calc((100vh - 3rem) * 1.5));
   margin: 0 auto;
 }
 
@@ -1966,6 +1966,7 @@ a {
   width: 100%;
   height: auto;
 }
+
 
 .public-office-hotspots {
   position: absolute;
