@@ -1263,8 +1263,8 @@ a {
   z-index: 1000;
   top: 50%;
   left: 50%;
-  width: min(580px, calc(100vw - 40px));
-  max-height: min(720px, calc(100vh - 40px));
+  width: min(900px, calc(100vw - 40px));
+  max-height: min(850px, calc(100vh - 40px));
   padding: 20px;
   overflow: auto;
   transform: translate(-50%, -50%);
@@ -2067,4 +2067,12 @@ a.office-hotspot:focus-visible {
     padding: 0.5rem 0.65rem;
     font-size: 0.65rem;
   }
+}
+
+.gif-picker-sticky-controls {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: white;
+  padding-bottom: 0.75rem;
 }

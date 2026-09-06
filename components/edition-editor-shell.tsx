@@ -100,31 +100,32 @@ export function EditionEditorShell({
 
     return (
         <>
-            {editionType === "regular_season" && (
-                <section className="editor-canvas editor-edition-details">
-                    <div className="edition-masthead-fields">
-                        <label>
-                            Volume
-                            <input
-                                type="number"
-                                name="volumeNumber"
-                                min="1"
-                                defaultValue={initialVolumeNumber ?? ""}
-                            />
-                        </label>
+            {(editionType === "regular_season" ||
+                editionType === "draft_grades") && (
+                    <section className="editor-canvas editor-edition-details">
+                        <div className="edition-masthead-fields">
+                            <label>
+                                Volume
+                                <input
+                                    type="number"
+                                    name="volumeNumber"
+                                    min="0"
+                                    defaultValue={initialVolumeNumber ?? ""}
+                                />
+                            </label>
 
-                        <label>
-                            Issue Number
-                            <input
-                                type="number"
-                                name="issueNumber"
-                                min="1"
-                                defaultValue={initialIssueNumber ?? ""}
-                            />
-                        </label>
-                    </div>
-                </section>
-            )}
+                            <label>
+                                Issue Number
+                                <input
+                                    type="number"
+                                    name="issueNumber"
+                                    min="0"
+                                    defaultValue={initialIssueNumber ?? ""}
+                                />
+                            </label>
+                        </div>
+                    </section>
+                )}
 
             <div className="edition-editor-wrapper">
                 <section className="editor-canvas editor-edition-details">
