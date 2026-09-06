@@ -52,6 +52,7 @@ export function GifPicker({
         }
 
         onSelectGif?.(gifUrl);
+        setIsOpen(false);
 
     };
 
