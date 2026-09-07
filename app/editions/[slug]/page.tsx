@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Masthead } from "@/components/masthead";
 import { createClient } from "@/lib/supabase/server";
 import { MatchupStory } from "@/components/matchup-story";
+import { ManagerGradeStory } from "@/components/manager-grade-story";
 
 export default async function EditionPage({
   params,
@@ -179,57 +180,14 @@ export default async function EditionPage({
 
                   {!managerGradesError &&
                     managerGrades?.map((managerGrade) => (
-                      <article
+                      <ManagerGradeStory
                         key={managerGrade.id}
-                        className="manager-grade-preview-card"
-                      >
-                        <h4>
-                          {managerGrade.manager_name || "Unnamed Manager"}
-                        </h4>
-
-                        {managerGrade.team_name && (
-                          <p className="manager-grade-team-name">
-                            {managerGrade.team_name}
-                          </p>
-                        )}
-
-                        <div className="manager-grade-roster">
-                          <p className="eyebrow">Drafted Roster</p>
-
-                          {managerGrade.roster_image_url || managerGrade.roster_image_url_2 ? (
-                            <div className="manager-grade-roster-images">
-                              {managerGrade.roster_image_url && (
-                                <img
-                                  src={managerGrade.roster_image_url}
-                                  alt={`${managerGrade.manager_name || "Manager"} drafted roster part 1`}
-                                  className="manager-grade-roster-image"
-                                />
-                              )}
-
-                              {managerGrade.roster_image_url_2 && (
-                                <img
-                                  src={managerGrade.roster_image_url_2}
-                                  alt={`${managerGrade.manager_name || "Manager"} drafted roster part 2`}
-                                  className="manager-grade-roster-image"
-                                />
-                              )}
-                            </div>
-                          ) : (
-                            <p>
-                              Yahoo roster data will appear here once league integration is available.
-                            </p>
-                          )}
-                        </div>
-
-                        <div
-                          className="story-body"
-                          dangerouslySetInnerHTML={{
-                            __html:
-                              managerGrade.body_html ||
-                              "<p>This manager grade remains unwritten.</p>",
-                          }}
-                        />
-                      </article>
+                        managerName={managerGrade.manager_name}
+                        teamName={managerGrade.team_name}
+                        bodyHtml={managerGrade.body_html}
+                        rosterImageUrl={managerGrade.roster_image_url}
+                        rosterImageUrl2={managerGrade.roster_image_url_2}
+                      />
                     ))}
                 </section>
 

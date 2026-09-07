@@ -2076,3 +2076,69 @@ a.office-hotspot:focus-visible {
   background: white;
   padding-bottom: 0.75rem;
 }
+
+.manager-grade-story-summary {
+  text-align: center;
+}
+
+.manager-grade-story-summary>div {
+  width: 100%;
+}
+
+.manager-grade-story-summary .matchup-expand-label {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.manager-grade-story {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+  padding: 0.9rem 0;
+}
+
+.manager-grade-story:first-of-type {
+  border-top: 1px solid rgba(0, 0, 0, 0.35);
+}
+
+.manager-grade-story-summary {
+  list-style: none;
+  cursor: pointer;
+  text-align: center;
+}
+
+.manager-grade-story-summary::-webkit-details-marker {
+  display: none;
+}
+
+.manager-grade-story-summary::marker {
+  display: none;
+}
+
+.manager-grade-story-summary>div {
+  width: 100%;
+}
+
+.manager-grade-story-summary h4 {
+  margin-bottom: 0.25rem;
+}
+
+.manager-grade-expand-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  margin-top: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.manager-grade-arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.manager-grade-story[open] .manager-grade-arrow {
+  transform: rotate(180deg);
+}
